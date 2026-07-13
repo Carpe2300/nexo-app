@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050606">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Nexo">
+  <title>Nexo</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon-192.png?v=nexo-black-20260711" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=nexo-black-20260711">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="light" data-risk="safe">
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Nexo, inicio">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span class="brand-wordmark">Nexo</span>
+      </a>
+      <div class="top-actions">
+        <button id="installBtn" class="install-btn" type="button" hidden>Instalar app</button>
+        <div class="month-toolbar" aria-label="Cambiar mes">
+          <button id="prevMonthBtn" class="icon-btn" type="button" aria-label="Mes anterior">‹</button>
+          <button id="monthLabelBtn" class="month-label-btn" type="button" aria-label="Elegir mes">
+            <span id="monthLabel">Mes actual</span>
+          </button>
+          <button id="nextMonthBtn" class="icon-btn" type="button" aria-label="Mes siguiente">›</button>
+          <input id="monthPicker" type="month" hidden>
+        </div>
+        <button id="themeToggleBtn" class="theme-toggle" type="button" aria-label="Cambiar a modo oscuro" title="Cambiar tema">
+          <span id="themeToggleIcon">☾</span>
+          <span id="themeToggleText">Oscuro</span>
+        </button>
+        <button id="resetBtn" class="icon-btn" type="button" title="Borrar todos los datos" aria-label="Borrar todos los datos">↺</button>
+      </div>
+    </header>
+
+    <section class="hero" data-screen="home">
+      <div>
+        <p class="eyebrow">TU MARGEN REAL</p>
+        <h1 id="mainBalance">0,00 €</h1>
+        <p id="balanceMessage" class="hero-copy">Configura tus ingresos y tu ahorro para empezar.</p>
+        <div id="riskSignal" class="risk-signal" hidden>
+          <span id="riskSignalIcon">●</span>
+          <p><strong id="riskSignalTitle">Atención</strong><small id="riskSignalText"></small></p>
+        </div>
+      </div>
+      <div class="allowance">
+        <div>
+          <span>HOY PUEDES GASTAR</span>
+          <strong id="dailyBudget">0,00 €</strong>
+        </div>
+        <div>
+          <span>ESTA SEMANA</span>
+          <strong id="weeklyBudget">0,00 €</strong>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="mobile-action-card" data-screen="home" aria-label="Acciones rápidas móvil">
+      <button class="mobile-action-btn primary" type="button" data-mobile-action="add-movement">
+        <span>＋</span><strong>Añadir</strong><small>movimiento</small>
+      </button>
+      <button class="mobile-action-btn" type="button" data-mobile-action="import">
+        <span>⇪</span><strong>Importar</strong><small>CSV/PDF</small>
+      </button>
+      <button class="mobile-action-btn" type="button" data-mobile-action="budgets">
+        <span>📊</span><strong>Límites</strong><small>presupuesto</small>
+      </button>
+      <button class="mobile-action-btn" type="button" data-mobile-action="recurring">
+        <span>↻</span><strong>Recurrente</strong><small>mensual</small>
+      </button>
+    </section>
+
+    <section class="dashboard-grid" data-screen="home">
+      <article class="card summary-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">PLAN DEL MES</p>
+            <h2>Tu dinero, con intención</h2>
+          </div>
+          <button id="editPlanBtn" class="text-btn" type="button">Editar plan</button>
+        </div>
+
+        <div class="budget-bar" aria-label="Distribución del presupuesto">
+          <span id="spentBar" class="bar-spent"></span>
+          <span id="savedBar" class="bar-saved"></span>
+        </div>
+        <div class="legend">
+          <span><i class="dot dot-spent"></i> Gastado</span>
+          <span><i class="dot dot-saved"></i> Para ahorro</span>
+          <span><i class="dot dot-free"></i> Disponible</span>
+        </div>
+
+        <div class="money-breakdown">
+          <div><span>Ingresos</span><strong id="incomeValue">0,00 €</strong></div>
+          <div><span>Gastos</span><strong id="expensesValue">0,00 €</strong></div>
+          <div><span>Ahorro objetivo</span><strong id="savingsValue">0,00 €</strong></div>
+        </div>
+      </article>
+
+      <article class="card insight-card">
+        <p class="eyebrow">RITMO DEL MES</p>
+        <div id="paceIcon" class="pace-icon">✓</div>
+        <h2 id="paceTitle">Todo bajo control</h2>
+        <p id="paceText">Añade tu primer gasto y aquí te diré si vas por buen camino.</p>
+        <div class="pace-stats">
+          <div><span>Días restantes</span><strong id="daysLeft">0</strong></div>
+          <div><span>Ahorro previsto</span><strong id="projectedSavings">0,00 €</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="card recurring-card" data-screen="movements">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">COMPROMISOS MENSUALES</p>
+          <h2>Gastos recurrentes</h2>
+          <p class="section-copy">Los pagos que ya sabes que llegarán. Se descuentan automáticamente cada mes.</p>
+        </div>
+        <button id="addRecurringBtn" class="secondary-btn" type="button"><span>＋</span> Añadir recurrente</button>
+      </div>
+      <div class="recurring-total">
+        <span>RESERVADO CADA MES</span>
+        <strong id="recurringTotal">0,00 €</strong>
+      </div>
+      <div id="recurringEmpty" class="recurring-empty">
+        <span>⌂</span>
+        <p>Casa, coche, luz, agua, suscripciones… añade lo que pagas habitualmente.</p>
+      </div>
+      <div id="recurringList" class="recurring-list" hidden></div>
+    </section>
+
+    <section class="analytics-grid" data-screen="home">
+      <article class="card chart-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">PULSO DEL MES</p>
+            <h2>Cómo estás gastando</h2>
+          </div>
+          <span id="chartPeriod" class="chart-period">Últimos 7 días</span>
+        </div>
+        <div id="spendingChart" class="spending-chart" aria-label="Gráfica de gasto diario"></div>
+        <div class="chart-legend">
+          <span><i class="dot dot-spent"></i> Gasto diario</span>
+          <strong id="chartAverage">Media: 0,00 €</strong>
+        </div>
+      </article>
+
+      <article class="card forecast-card">
+        <p class="eyebrow">PROYECCIÓN</p>
+        <h2>¿Llegas a tu objetivo?</h2>
+        <div class="forecast-visual">
+          <svg id="forecastRing" viewBox="0 0 120 120" role="img" aria-label="Porcentaje del presupuesto consumido">
+            <circle class="ring-track" cx="60" cy="60" r="49"></circle>
+            <circle id="ringProgress" class="ring-progress" cx="60" cy="60" r="49"></circle>
+          </svg>
+          <div class="ring-label"><strong id="budgetPercent">0%</strong><span>consumido</span></div>
+        </div>
+        <p id="forecastMessage" class="forecast-message">Configura tu plan para ver una proyección.</p>
+        <div class="forecast-footer">
+          <span>Gasto previsto a fin de mes</span>
+          <strong id="forecastSpend">0,00 €</strong>
+        </div>
+      </article>
+    </section>
+
+
+
+    <section class="smart-grid" data-screen="home">
+      <article class="card smart-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">PANEL INTELIGENTE</p>
+            <h2>Qué está pasando este mes</h2>
+            <p id="smartSummary" class="section-copy">Importa movimientos o añade gastos para ver un análisis útil.</p>
+          </div>
+          <span id="smartScore" class="smart-score">—</span>
+        </div>
+        <div id="monthComparison" class="comparison-grid"></div>
+      </article>
+
+      <article class="card alerts-card">
+        <p class="eyebrow">AVISOS ÚTILES</p>
+        <h2>Señales a vigilar</h2>
+        <div id="smartAlerts" class="smart-alert-list"></div>
+      </article>
+    </section>
+
+    <section class="smart-grid detail-smart-grid" data-screen="home">
+      <article class="card top-expenses-card">
+        <p class="eyebrow">TOP GASTOS</p>
+        <h2>Lo que más pesa</h2>
+        <div id="topExpensesList" class="top-expenses-list"></div>
+      </article>
+
+      <article class="card category-compare-card">
+        <p class="eyebrow">CATEGORÍAS VS MES ANTERIOR</p>
+        <h2>Dónde sube o baja</h2>
+        <div id="categoryCompareList" class="category-compare-list"></div>
+      </article>
+    </section>
+
+    <section class="card report-card" data-screen="reports">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">INFORME MENSUAL</p>
+          <h2>Resumen inteligente</h2>
+          <p class="section-copy">Una lectura rápida de ingresos, gastos, ahorro, categorías y avisos del mes seleccionado.</p>
+        </div>
+        <button id="downloadMonthlyReportBtn" class="secondary-btn" type="button">Descargar informe</button>
+      </div>
+      <div id="monthlyReportHero" class="monthly-report-hero"></div>
+      <div id="monthlyReportStats" class="monthly-report-stats"></div>
+      <div class="report-grid">
+        <article>
+          <p class="eyebrow">CATEGORÍAS</p>
+          <h3>Dónde se va el dinero</h3>
+          <div id="monthlyReportCategories" class="monthly-report-list"></div>
+        </article>
+        <article>
+          <p class="eyebrow">TOP GASTOS</p>
+          <h3>Lo que más pesa</h3>
+          <div id="monthlyReportTop" class="monthly-report-list"></div>
+        </article>
+      </div>
+      <div class="report-grid">
+        <article>
+          <p class="eyebrow">COMPARATIVA</p>
+          <h3>Contra el mes anterior</h3>
+          <div id="monthlyReportComparison" class="monthly-report-list"></div>
+        </article>
+        <article>
+          <p class="eyebrow">AVISOS</p>
+          <h3>Qué vigilar</h3>
+          <div id="monthlyReportAlerts" class="monthly-report-list"></div>
+        </article>
+      </div>
+    </section>
+
+
+    <section class="card category-budget-card" data-screen="budgets">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">PRESUPUESTOS POR CATEGORÍA</p>
+          <h2>Límites del mes</h2>
+          <p class="section-copy">Marca cuánto quieres gastar como máximo en cada categoría. La app te avisa si te acercas o si vas a pasarte.</p>
+        </div>
+        <button id="editCategoryBudgetsBtn" class="secondary-btn" type="button">Editar límites</button>
+      </div>
+      <div id="categoryBudgetList" class="category-budget-list"></div>
+    </section>
+
+
+    <section class="card goals-card" data-screen="goals">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">OBJETIVOS DE AHORRO</p>
+          <h2>Metas y progreso</h2>
+          <p class="section-copy">Crea objetivos como vacaciones, fondo de emergencia o una consola. La app calcula cuánto falta y cuánto deberías apartar al mes.</p>
+        </div>
+        <div class="card-actions"><button id="downloadGoalsPlanBtn" class="secondary-btn" type="button">Descargar plan</button><button id="addGoalBtn" class="primary-btn" type="button"><span>＋</span> Añadir objetivo</button></div>
+      </div>
+      <div id="goalsSummary" class="goals-summary"></div>
+      <div id="goalsActionPanel" class="goals-action-panel"></div>
+      <div id="goalsList" class="goals-list"></div>
+    </section>
+
+    <section class="lower-grid" data-screen="movements">
+      <article class="card transactions-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">MOVIMIENTOS</p>
+            <h2>Actividad reciente</h2>
+          </div>
+          <div class="card-actions">
+            <button id="importCsvBtn" class="secondary-btn" type="button"><span>⇪</span> Importar extracto</button>
+            <button id="addExpenseBtn" class="primary-btn" type="button"><span>＋</span> Añadir movimiento</button>
+          </div>
+        </div>
+        <div class="movement-tools" id="movementTools">
+          <label class="movement-search">
+            <span>Buscar</span>
+            <input id="movementSearchInput" type="search" placeholder="Netflix, Repsol, Bizum..." autocomplete="off">
+          </label>
+          <label>
+            <span>Tipo</span>
+            <select id="movementTypeFilter">
+              <option value="all">Todos</option>
+              <option value="expense">Gastos</option>
+              <option value="income">Ingresos</option>
+            </select>
+          </label>
+          <label>
+            <span>Categoría</span>
+            <select id="movementCategoryFilter"><option value="all">Todas</option></select>
+          </label>
+          <button id="lastImportFilterBtn" class="secondary-btn compact-filter-btn" type="button" hidden>Ver última importación</button>
+          <button id="clearMovementFiltersBtn" class="secondary-btn compact-filter-btn" type="button">Limpiar filtros</button>
+        </div>
+        <div id="importReviewSummary" class="import-review-summary" hidden></div>
+        <div id="bulkToolbar" class="bulk-toolbar" hidden></div>
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon">↘</div>
+          <h3>Aún no hay movimientos</h3>
+          <p>Añade un gasto, una devolución o un ingreso para ver tu margen real.</p>
+        </div>
+        <div id="transactionList" class="transaction-list" hidden></div>
+      </article>
+
+      <article class="card categories-card">
+        <p class="eyebrow">POR CATEGORÍA</p>
+        <h2>¿Dónde se va?</h2>
+        <div id="categoryList" class="category-list">
+          <p class="muted">Tus categorías aparecerán aquí.</p>
+        </div>
+      </article>
+    </section>
+
+
+    <section class="card custom-categories-card" data-screen="settings">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">CATEGORÍAS PERSONALIZADAS</p>
+          <h2>Tus etiquetas y emojis</h2>
+          <p class="section-copy">Crea categorías propias, cambia el icono de “Otros” o adapta la app a tus gastos reales.</p>
+        </div>
+        <button id="addCategoryBtn" class="secondary-btn" type="button"><span>＋</span> Añadir categoría</button>
+      </div>
+      <div id="customCategoryList" class="custom-category-list"></div>
+    </section>
+
+    <section class="card data-tools-card" data-screen="settings">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">DATOS Y COPIAS</p>
+          <h2>Importa, guarda y restaura</h2>
+          <p class="section-copy">Todo sigue guardado en tu navegador. Haz copias antes de meter muchos movimientos.</p>
+        </div>
+        <div class="card-actions">
+          <button id="exportBackupBtn" class="secondary-btn" type="button">Exportar copia</button>
+          <button id="importBackupBtn" class="secondary-btn" type="button">Restaurar copia</button>
+          <input id="backupFileInput" type="file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+      <div class="backup-hint"><strong>Consejo:</strong> si abres Nexo en otro PC, primero exporta una copia aquí y luego restáurala allí. Cada navegador guarda sus propios datos.</div>
+      <div id="installHelp" class="install-help" hidden><strong>Instalar como app:</strong> abre la app desde un servidor local o desde GitHub Pages. Si la abres con doble clic en index.html, algunos navegadores no dejan instalarla.</div>
+    </section>
+
+    <section class="card share-ready-card" data-screen="settings">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">PREPARADA PARA COMPARTIR</p>
+          <h2>Bienvenida, demo y privacidad</h2>
+          <p class="section-copy">Herramientas para enseñar la app a otra persona sin tocar datos reales.</p>
+        </div>
+      </div>
+      <div class="share-actions-grid">
+        <button id="openWelcomeBtn" class="secondary-btn" type="button">Ver bienvenida</button>
+        <button id="loadDemoBtn" class="secondary-btn" type="button">Cargar modo demo</button>
+        <button id="clearDemoBtn" class="secondary-btn" type="button">Borrar demo</button>
+        <button id="privacyInfoBtn" class="secondary-btn" type="button">Privacidad y datos</button>
+        <button id="deleteAllDataBtn" class="danger-soft-btn" type="button">Borrar todos mis datos</button>
+      </div>
+      <div class="backup-hint"><strong>Para compartir:</strong> pásale el ZIP completo, que lo descomprima y abra <code>1_INICIAR_NEXO.bat</code>. Para móvil, que use <code>2_INICIAR_NEXO_WIFI.bat</code>.</div>
+    </section>
+
+    <section class="card wifi-sync-card" data-screen="settings">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">SINCRONIZACIÓN WIFI</p>
+          <h2>PC y móvil con los mismos datos</h2>
+          <p class="section-copy">Sincroniza con el PC de forma más segura: la app te avisa si hay cambios sin guardar o si la copia del PC es más nueva.</p>
+        </div>
+        <div class="card-actions sync-actions">
+          <button id="smartWifiSyncBtn" class="primary-btn" type="button">Sincronizar ahora</button>
+          <button id="pushWifiSyncBtn" class="secondary-btn" type="button">Guardar en PC</button>
+          <button id="pullWifiSyncBtn" class="secondary-btn" type="button">Traer del PC</button>
+        </div>
+      </div>
+      <div class="sync-preferences">
+        <label class="sync-toggle"><input id="autoWifiSyncCheck" type="checkbox"> Guardar automáticamente en PC cuando haga cambios</label>
+        <p>Recomendado cuando estés en casa con el modo WiFi abierto. Si varios dispositivos editan a la vez, revisa el aviso antes de sobrescribir.</p>
+      </div>
+      <div id="wifiSyncStatus" class="backup-hint">Abre la app con el modo WiFi para usar esta función.</div>
+    </section>
+
+
+    <section class="card mobile-access-card" data-screen="settings">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">MÓVIL Y PWA</p>
+          <h2>Usarla desde el iPhone o Android</h2>
+          <p class="section-copy">Para probarla en el móvil, arranca el archivo <strong>2_INICIAR_NEXO_WIFI.bat</strong> y abre la dirección WiFi que salga en la ventana negra.</p>
+        </div>
+        <button id="copyCurrentUrlBtn" class="secondary-btn" type="button">Copiar dirección actual</button>
+      </div>
+      <div class="mobile-steps">
+        <div><strong>1</strong><span>PC y móvil en la misma WiFi.</span></div>
+        <div><strong>2</strong><span>Ejecuta <code>2_INICIAR_NEXO_WIFI.bat</code>.</span></div>
+        <div><strong>3</strong><span>En Safari/Chrome abre la URL <code>http://192.168.x.x:8765/</code>.</span></div>
+        <div><strong>4</strong><span>En iPhone: Compartir → Añadir a pantalla de inicio.</span></div>
+      </div>
+      <div class="backup-hint"><strong>Nuevo:</strong> en Ajustes → Sincronización WiFi puedes guardar los datos en el PC y traerlos desde el móvil sin exportar copias manuales.</div>
+    </section>
+
+
+    <section class="bank-screen-grid" data-screen="bank">
+      <article class="card bank-hero-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">BANCO</p>
+            <h2>Tu cuenta, sin depender de GoCardless</h2>
+            <p class="section-copy">Nexo queda preparado para Open Banking real, pero ahora puedes probar todo el flujo con un banco demo: compras, Bizum, devoluciones, nómina y suscripciones.</p>
+          </div>
+          <span id="bankConnectionBadge" class="bank-connection-badge">Demo</span>
+        </div>
+        <div class="bank-provider-panel">
+          <div>
+            <span>Proveedor actual</span>
+            <strong id="bankProviderName">Demo local</strong>
+            <small id="bankProviderStatus">Sin credenciales reales. La app funciona en modo simulación.</small>
+          </div>
+          <div>
+            <span>Backend local</span>
+            <strong id="bankBackendStatus">Comprobando...</strong>
+            <small id="bankBackendHint">Nexo mirará si existe http://localhost:8787/health.</small>
+          </div>
+        </div>
+        <div class="bank-actions">
+          <button id="connectDemoBankBtn" class="primary-btn" type="button">Conectar banco demo</button>
+          <button id="syncDemoBankBtn" class="secondary-btn" type="button">Sincronizar movimientos</button>
+          <button id="importDemoBankBtn" class="secondary-btn" type="button">Importar a Nexo</button>
+        </div>
+        <div id="bankReviewPanel" class="bank-review-panel"></div>
+      </article>
+
+      <article class="card bank-accounts-card">
+        <p class="eyebrow">CUENTAS</p>
+        <h2>Bancos preparados</h2>
+        <div id="bankAccountList" class="bank-account-list"></div>
+      </article>
+
+      <article class="card bank-movements-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">SINCRONIZACIÓN</p>
+            <h2>Movimientos detectados</h2>
+            <p class="section-copy">Estos movimientos son candidatos. Al importarlos, Nexo evita duplicados y los clasifica.</p>
+          </div>
+          <span id="bankSyncLabel" class="bank-sync-label">Pendiente</span>
+        </div>
+        <div id="bankMovementList" class="bank-movement-list"></div>
+      </article>
+
+      <article class="card bank-provider-card">
+        <p class="eyebrow">PROVEEDOR REAL</p>
+        <h2>La pieza intercambiable</h2>
+        <p class="section-copy">GoCardless ahora pide alta dentro de su plataforma de pagos/negocio. Para Nexo lo sensato es mantener la capa bancaria separada y enchufar el proveedor que nos deje operar mejor.</p>
+        <div class="provider-options">
+          <span>Salt Edge</span>
+          <span>Tink</span>
+          <span>TrueLayer</span>
+          <span>Plaid Europe</span>
+        </div>
+      </article>
+    </section>
+
+
+    <section class="card bank-automation-card" data-screen="settings">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">BANCO AUTOMÁTICO</p>
+          <h2>Movimientos sin meterlos a mano</h2>
+          <p class="section-copy">El camino serio es conectar el banco con Open Banking/PSD2. Nexo no necesita tu contraseña: el consentimiento ocurre en la web o app del banco.</p>
+        </div>
+      </div>
+      <div class="bank-path-grid">
+        <div>
+          <strong>1</strong>
+          <span>Conectar banco</span>
+          <small>Proveedor regulado: GoCardless, Plaid, Tink o similar.</small>
+        </div>
+        <div>
+          <strong>2</strong>
+          <span>Backend seguro</span>
+          <small>Guarda tokens cifrados y pide movimientos al banco.</small>
+        </div>
+        <div>
+          <strong>3</strong>
+          <span>Nexo clasifica</span>
+          <small>Gastos, ingresos, Bizum, devoluciones y duplicados.</small>
+        </div>
+      </div>
+      <div class="platform-notes">
+        <div><strong>Android</strong><span>Se puede añadir un lector opcional de notificaciones del banco, con permiso explícito, para detectar compras al momento.</span></div>
+        <div><strong>iPhone</strong><span>No puede leer notificaciones de otras apps. Para iPhone hay que usar Open Banking, importación de extractos o atajos/manual share-sheet si el banco permite exportar.</span></div>
+      </div>
+    </section>
+
+
+    <section class="card app-version-card" data-screen="settings">
+      <p class="eyebrow">VERSIÓN</p>
+      <h2>Nexo v1.23 revisión bancaria</h2>
+      <p class="section-copy">Versión con pantalla Banco, revisión previa de movimientos, modo demo de sincronización, nuevo logo, experiencia móvil, modo WiFi y guía clara para automatización bancaria.</p>
+    </section>
+
+    <section class="card rules-card" data-screen="settings">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">REGLAS INTELIGENTES</p>
+          <h2>La app aprende de ti</h2>
+          <p class="section-copy">Crea reglas para que los próximos extractos se clasifiquen como tú quieres.</p>
+        </div>
+        <button id="addRuleBtn" class="secondary-btn" type="button"><span>＋</span> Añadir regla</button>
+      </div>
+      <div id="rulesEmpty" class="rules-empty">
+        <span>↻</span>
+        <p>Aún no tienes reglas propias. Corrige un movimiento o crea una regla manual.</p>
+      </div>
+      <div id="rulesList" class="rules-list" hidden></div>
+    </section>
+  </main>
+
+  <dialog id="planDialog">
+    <form id="planForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">TU PLAN</p>
+          <h2>Prepara el mes</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p class="dialog-copy">Dinos cuánto entra y cuánto quieres guardar. Nosotros hacemos el resto.</p>
+      <label>Ingresos netos del mes
+        <div class="input-money"><input id="incomeInput" type="number" min="0" step="0.01" required placeholder="1800"><span>€</span></div>
+      </label>
+      <label>Quiero ahorrar
+        <div class="input-money"><input id="savingsInput" type="number" min="0" step="0.01" required placeholder="300"><span>€</span></div>
+      </label>
+      <p id="planPreview" class="plan-preview">Te quedarían 0,00 € para tus gastos.</p>
+      <button class="submit-btn" type="submit">Guardar mi plan</button>
+    </form>
+  </dialog>
+
+  <dialog id="monthDialog" class="month-dialog">
+    <form method="dialog">
+      <div class="month-dialog-head">
+        <div>
+          <p class="eyebrow">CALENDARIO</p>
+          <h2>Elige el mes</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <div class="month-dialog-toolbar">
+        <button id="prevYearBtn" class="icon-btn" type="button" aria-label="Año anterior">‹</button>
+        <strong id="monthDialogYear" class="month-dialog-year">2026</strong>
+        <button id="nextYearBtn" class="icon-btn" type="button" aria-label="Año siguiente">›</button>
+      </div>
+      <div id="monthDialogGrid" class="month-dialog-grid" role="grid" aria-label="Meses del año"></div>
+      <div class="month-dialog-footer">
+        <button id="monthDialogToday" class="secondary-btn" type="button">Este mes</button>
+        <button class="submit-btn month-close-btn" type="button" data-close>Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="expenseDialog">
+    <form id="expenseForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">NUEVO MOVIMIENTO</p>
+          <h2 id="expenseDialogTitle">Añadir gasto</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <div class="movement-type-switch" role="group" aria-label="Tipo de movimiento">
+        <button class="movement-type active" type="button" data-movement-type="expense">↘ Gasto</button>
+        <button class="movement-type" type="button" data-movement-type="income">↗ Ingreso</button>
+      </div>
+      <input id="movementType" type="hidden" value="expense">
+      <input id="expenseId" type="hidden">
+      <label>Concepto
+        <input id="expenseName" type="text" maxlength="50" required placeholder="Ej. Supermercado">
+      </label>
+      <div class="form-row">
+        <label>Importe
+          <div class="input-money"><input id="expenseAmount" type="number" min="0.01" step="0.01" required placeholder="24,50"><span>€</span></div>
+        </label>
+        <label>Fecha
+          <input id="expenseDate" type="date" required>
+        </label>
+      </div>
+      <label>Categoría
+        <select id="expenseCategory">
+          <option>Vivienda</option>
+          <option>Alimentación</option>
+          <option>Transporte</option>
+          <option>Ocio</option>
+          <option>Salud</option>
+          <option>Compras</option>
+          <option>Suscripciones</option>
+          <option>Otros</option>
+        </select>
+      </label>
+      <label id="learnRuleBox" class="checkbox-row" hidden>
+        <input id="learnRuleCheck" type="checkbox">
+        <span>Aprender una regla con este concepto para futuros extractos</span>
+      </label>
+      <button id="movementSubmitBtn" class="submit-btn" type="submit">Guardar gasto</button>
+    </form>
+  </dialog>
+
+  <dialog id="recurringDialog" class="wide-dialog">
+    <form id="recurringForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">GASTO RECURRENTE</p>
+          <h2>¿Qué pagas cada mes?</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p class="dialog-copy">Elige una plantilla o crea la tuya. Si entras en <strong>Suscripciones</strong>, solo verás suscripciones. Si entras en <strong>Cotidianos</strong>, solo verás cotidianos.</p>
+      <div class="template-tabs" role="tablist" aria-label="Tipo de recurrente">
+        <button class="template-tab active" type="button" data-template-tab="everyday" aria-selected="true">Cotidianos</button>
+        <button class="template-tab" type="button" data-template-tab="subscriptions" aria-selected="false">Suscripciones</button>
+      </div>
+      <div id="templateGrid" class="template-grid" role="radiogroup" aria-label="Tipo de gasto">
+        <button type="button" class="template active" data-group="everyday" data-template="Casa" data-category="Vivienda"><span class="draw-icon" data-icon="house"></span>Casa</button>
+        <button type="button" class="template" data-group="everyday" data-template="Coche" data-category="Transporte"><span class="draw-icon" data-icon="car"></span>Coche</button>
+        <button type="button" class="template" data-group="everyday" data-template="Agua" data-category="Vivienda"><span class="draw-icon" data-icon="water"></span>Agua</button>
+        <button type="button" class="template" data-group="everyday" data-template="Luz" data-category="Vivienda"><span class="draw-icon" data-icon="bolt"></span>Luz</button>
+        <button type="button" class="template" data-group="everyday" data-template="Gas" data-category="Vivienda"><span class="draw-icon" data-icon="flame"></span>Gas</button>
+        <button type="button" class="template" data-group="everyday" data-template="Parking" data-category="Transporte"><span class="draw-icon" data-icon="parking"></span>Parking</button>
+        <button type="button" class="template" data-group="everyday" data-template="Internet y móvil" data-category="Suscripciones"><span class="draw-icon" data-icon="wifi"></span>Internet</button>
+        <button type="button" class="template" data-group="everyday" data-template="Seguro" data-category="Otros"><span class="draw-icon" data-icon="shield"></span>Seguro</button>
+        <button type="button" class="template" data-group="everyday" data-template="Gimnasio" data-category="Salud"><span class="draw-icon" data-icon="gym"></span>Gimnasio</button>
+        <button type="button" class="template" data-group="everyday" data-template="Comunidad" data-category="Vivienda"><span class="draw-icon" data-icon="building"></span>Comunidad</button>
+        <button type="button" class="template" data-group="everyday" data-template="Otro" data-category="Otros"><span class="draw-icon" data-icon="plus"></span>Otro</button>
+
+        <button type="button" class="template brand-template" data-group="subscriptions" data-template="Netflix" data-brand="netflix" data-category="Suscripciones" hidden><span class="brand-logo"><img src="assets/brands/netflix.svg" alt="Netflix"></span>Netflix</button>
+        <button type="button" class="template brand-template" data-group="subscriptions" data-template="Disney+" data-brand="disney" data-category="Suscripciones" hidden><span class="brand-logo"><img src="assets/brands/disneyplus.svg" alt="Disney+"></span>Disney+</button>
+        <button type="button" class="template brand-template" data-group="subscriptions" data-template="Spotify" data-brand="spotify" data-category="Suscripciones" hidden><span class="brand-logo"><img src="assets/brands/spotify.svg" alt="Spotify"></span>Spotify</button>
+        <button type="button" class="template brand-template" data-group="subscriptions" data-template="Prime Video" data-brand="prime" data-category="Suscripciones" hidden><span class="brand-logo"><img src="assets/brands/primevideo.svg" alt="Prime Video"></span>Prime Video</button>
+        <button type="button" class="template brand-template" data-group="subscriptions" data-template="Max" data-brand="max" data-category="Suscripciones" hidden><span class="brand-logo"><img src="assets/brands/max.svg" alt="Max"></span>Max</button>
+        <button type="button" class="template brand-template" data-group="subscriptions" data-template="YouTube Premium" data-brand="youtube" data-category="Suscripciones" hidden><span class="brand-logo"><img src="assets/brands/youtube.svg" alt="YouTube"></span>YouTube</button>
+        <button type="button" class="template brand-template" data-group="subscriptions" data-template="Apple" data-brand="apple" data-category="Suscripciones" hidden><span class="brand-logo"><img src="assets/brands/apple.svg" alt="Apple"></span>Apple</button>
+        <button type="button" class="template" data-group="subscriptions" data-template="Otra suscripción" data-category="Suscripciones" hidden><span class="draw-icon" data-icon="play"></span>Otra</button>
+      </div>
+      <input id="recurringId" type="hidden">
+      <input id="recurringCategory" type="hidden" value="Vivienda">
+      <div class="form-row">
+        <label>Nombre
+          <input id="recurringName" type="text" maxlength="50" required placeholder="Ej. Alquiler">
+        </label>
+        <label>Cuánto al mes
+          <div class="input-money"><input id="recurringAmount" type="number" min="0.01" step="0.01" required placeholder="650"><span>€</span></div>
+        </label>
+      </div>
+      <button class="submit-btn" type="submit">Añadir a mi plan</button>
+    </form>
+  </dialog>
+
+  <dialog id="ruleDialog">
+    <form id="ruleForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">NUEVA REGLA</p>
+          <h2>Clasificar automáticamente</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p class="dialog-copy">Cuando un movimiento del banco contenga esta palabra, Nexo le pondrá la categoría que elijas.</p>
+      <label>Si el concepto contiene
+        <input id="ruleKeyword" type="text" maxlength="50" required placeholder="Ej. PAYPAL *NETFLIX">
+      </label>
+      <label>Nombre limpio opcional
+        <input id="ruleName" type="text" maxlength="60" placeholder="Ej. Netflix">
+      </label>
+      <div class="form-row">
+        <label>Tipo
+          <select id="ruleType">
+            <option value="expense">Gasto</option>
+            <option value="income">Ingreso</option>
+          </select>
+        </label>
+        <label>Categoría
+          <select id="ruleCategory"></select>
+        </label>
+      </div>
+      <button class="submit-btn" type="submit">Guardar regla</button>
+    </form>
+  </dialog>
+
+  <dialog id="csvDialog" class="wide-dialog csv-dialog">
+    <form id="csvForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">IMPORTADOR BANCO</p>
+          <h2>Importar movimientos</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p class="dialog-copy">Sube un CSV o PDF del banco. Si es PDF BBVA, Nexo lo convierte primero a CSV con el conversor local y después lo importa limpio.</p>
+      <div id="converterStatus" class="converter-status checking">Comprobando conversor BBVA local...</div>
+      <label>Archivo CSV o PDF del banco
+        <input id="csvFileInput" type="file" accept=".csv,text/csv,.txt,.pdf,application/pdf">
+      </label>
+      <div id="pdfPasswordBox" class="pdf-password-box" hidden>
+        <label>Contraseña del PDF
+          <input id="pdfPasswordInput" type="password" autocomplete="off" placeholder="Contraseña del extracto">
+        </label>
+        <button id="retryPdfPasswordBtn" class="secondary-btn" type="button">Reintentar con contraseña</button>
+        <p class="dialog-copy">La contraseña solo se usa para abrir este PDF. No se guarda en la app ni en la copia de seguridad.</p>
+      </div>
+      <div id="csvImportStatus" class="import-status">Aún no has seleccionado ningún archivo.</div>
+      <div id="csvPreview" class="csv-preview" hidden></div>
+      <button id="confirmCsvImportBtn" class="submit-btn" type="button" disabled>Importar movimientos detectados</button>
+    </form>
+  </dialog>
+
+
+
+
+  <dialog id="goalDialog" class="goal-dialog">
+    <form id="goalForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">OBJETIVO</p>
+          <h2 id="goalDialogTitle">Nuevo objetivo</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p class="dialog-copy">Define cuánto quieres ahorrar y hasta cuándo. Puedes ir sumando aportaciones cuando avances.</p>
+      <input id="goalId" type="hidden">
+      <label>Nombre del objetivo
+        <input id="goalName" type="text" maxlength="50" required placeholder="Ej. Vacaciones, fondo emergencia, PS5">
+      </label>
+      <div class="form-row">
+        <label>Cantidad objetivo
+          <div class="input-money"><input id="goalTarget" type="number" min="1" step="0.01" required placeholder="1000"><span>€</span></div>
+        </label>
+        <label>Ahorrado ahora
+          <div class="input-money"><input id="goalSaved" type="number" min="0" step="0.01" placeholder="250"><span>€</span></div>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Fecha objetivo
+          <input id="goalDeadline" type="date">
+        </label>
+        <label>Emoji/icono
+          <input id="goalIcon" type="text" maxlength="2" placeholder="🏖️">
+          <div class="emoji-suggestions" data-emoji-target="goalIcon"></div>
+        </label>
+      </div>
+      <button class="submit-btn" type="submit">Guardar objetivo</button>
+    </form>
+  </dialog>
+
+
+  <dialog id="categoryDialog" class="category-dialog">
+    <form id="categoryForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">CATEGORÍA</p>
+          <h2 id="categoryDialogTitle">Nueva categoría</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p class="dialog-copy">Ponle un nombre claro y un emoji. Luego aparecerá en movimientos, presupuestos, reglas e importaciones.</p>
+      <input id="categoryEditOriginal" type="hidden">
+      <input id="categoryEditBuiltIn" type="hidden">
+      <div class="form-row">
+        <label>Tipo
+          <select id="categoryType">
+            <option value="expense">Gasto</option>
+            <option value="income">Ingreso</option>
+          </select>
+        </label>
+        <label>Emoji/icono
+          <input id="categoryIconInput" type="text" maxlength="2" placeholder="🎮">
+          <div class="emoji-suggestions" data-emoji-target="categoryIconInput"></div>
+        </label>
+      </div>
+      <label>Nombre
+        <input id="categoryNameInput" type="text" maxlength="34" required placeholder="Ej. Gaming, Mascota, Regalos">
+      </label>
+      <button class="submit-btn" type="submit">Guardar categoría</button>
+    </form>
+  </dialog>
+
+  <dialog id="categoryBudgetDialog" class="wide-dialog category-budget-dialog">
+    <form id="categoryBudgetForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">LÍMITES MENSUALES</p>
+          <h2>Presupuestos por categoría</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p class="dialog-copy">Pon 0 o deja vacío si no quieres controlar una categoría. Los límites se aplican cada mes.</p>
+      <div id="categoryBudgetFormRows" class="category-budget-form-rows"></div>
+      <button class="submit-btn" type="submit">Guardar presupuestos</button>
+    </form>
+  </dialog>
+
+  <dialog id="confirmDialog" class="confirm-dialog">
+    <form method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">CONFIRMAR</p>
+          <h2 id="confirmTitle">¿Seguro?</h2>
+        </div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">×</button>
+      </div>
+      <p id="confirmText" class="dialog-copy confirm-copy">Esta acción no se puede deshacer.</p>
+      <div class="confirm-dialog-actions">
+        <button id="confirmCancelBtn" class="secondary-btn" type="button">Cancelar</button>
+        <button id="confirmOkBtn" class="submit-btn danger-btn" type="button">Eliminar</button>
+      </div>
+    </form>
+  </dialog>
+
+
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <button class="bottom-nav-btn active" type="button" data-nav-screen="home">
+      <span>🏠</span><strong>Inicio</strong>
+    </button>
+    <button class="bottom-nav-btn" type="button" data-nav-screen="movements">
+      <span>💳</span><strong>Movimientos</strong>
+    </button>
+    <button class="bottom-nav-btn" type="button" data-nav-screen="budgets">
+      <span>📊</span><strong>Presupuestos</strong>
+    </button>
+    <button class="bottom-nav-btn" type="button" data-nav-screen="goals">
+      <span>🎯</span><strong>Objetivos</strong>
+    </button>
+    <button class="bottom-nav-btn" type="button" data-nav-screen="reports">
+      <span>📈</span><strong>Informes</strong>
+    </button>
+    <button class="bottom-nav-btn" type="button" data-nav-screen="bank">
+      <span>🏦</span><strong>Banco</strong>
+    </button>
+    <button class="bottom-nav-btn" type="button" data-nav-screen="settings">
+      <span>⚙</span><strong>Ajustes</strong>
+    </button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

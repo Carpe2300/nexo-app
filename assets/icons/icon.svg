@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="76" y1="40" x2="430" y2="482" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1c1f1f"/>
+      <stop offset=".48" stop-color="#0a0d0d"/>
+      <stop offset="1" stop-color="#030505"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="86" y1="74" x2="426" y2="452" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#343838"/>
+      <stop offset=".48" stop-color="#121515"/>
+      <stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="126" y1="126" x2="386" y2="388" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f3f4ef"/>
+      <stop offset=".08" stop-color="#777d79"/>
+      <stop offset=".44" stop-color="#2b302e"/>
+      <stop offset=".72" stop-color="#4b514e"/>
+      <stop offset="1" stop-color="#0f1211"/>
+    </linearGradient>
+    <linearGradient id="curve" x1="132" y1="372" x2="344" y2="190" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#151918"/>
+      <stop offset=".52" stop-color="#8ff2d2"/>
+      <stop offset="1" stop-color="#effff8"/>
+    </linearGradient>
+    <filter id="lift" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#000" flood-opacity=".55"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#eafff7" flood-opacity=".42"/>
+    </filter>
+    <filter id="curveGlow" x="-35%" y="-35%" width="170%" height="170%">
+      <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#8ff2d2" flood-opacity=".32"/>
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000" flood-opacity=".42"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#000"/>
+  <rect x="38" y="38" width="436" height="436" rx="92" fill="url(#rim)"/>
+  <rect x="50" y="50" width="412" height="412" rx="82" fill="url(#bg)"/>
+  <path d="M79 111c82-25 202-27 328 1" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".08"/>
+  <path d="M56 345c90 42 190 50 286 20 48-15 88-38 120-67v76c0 49-39 88-88 88H138c-49 0-88-39-88-88v-32c2 1 4 2 6 3z" fill="#000" opacity=".28"/>
+
+  <g filter="url(#lift)">
+    <path d="M136 379V134l73 59c24 19 36 37 36 63v108l-44-39v-103l-31-25v182z" fill="#050707" opacity=".72"/>
+    <path d="M132 372V128l72 59c24 20 37 38 37 64v110l-43-39V219l-30-24v177z" fill="url(#metal)"/>
+    <path d="M132 372V128l72 59c24 20 37 38 37 64v110l-43-39V219l-30-24v177z" fill="none" stroke="#eef5ef" stroke-width="4" opacity=".55"/>
+
+    <path d="M323 139h57v228l-57-50z" fill="#050707" opacity=".72"/>
+    <path d="M316 132h58v226l-58-50z" fill="url(#metal)"/>
+    <path d="M316 132h58v226l-58-50z" fill="none" stroke="#eef5ef" stroke-width="4" opacity=".55"/>
+  </g>
+
+  <g filter="url(#curveGlow)">
+    <path d="M135 371c18-82 67-127 119-157 42-24 72-48 91-91v72c-19 35-49 58-89 80-50 28-92 58-121 96z" fill="#070908" opacity=".86"/>
+    <path d="M136 360c24-72 73-110 122-139 40-24 69-50 88-95v59c-21 39-52 65-94 88-47 26-85 52-116 87z" fill="url(#curve)"/>
+    <path d="M143 339c30-55 70-85 113-111 36-22 62-43 82-78" fill="none" stroke="#dffff5" stroke-width="5" stroke-linecap="round" opacity=".92"/>
+  </g>
+</svg>

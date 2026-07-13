@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 280 90" aria-labelledby="title desc">
+  <title id="title">HBO Max</title>
+  <desc id="desc">Logotipo estilizado de Max en azul y violeta.</desc>
+  <defs>
+    <linearGradient id="maxGradient" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#7A68FF"/>
+      <stop offset="55%" stop-color="#5F7CFF"/>
+      <stop offset="100%" stop-color="#4AA4FF"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#maxGradient)">
+    <text x="18" y="62" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="800" letter-spacing="-3">max</text>
+  </g>
+</svg>

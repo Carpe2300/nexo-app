@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Limpiar caché - Nexo</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0c1712;color:#f7f1df;display:grid;min-height:100vh;place-items:center;margin:0;padding:24px}
+    .box{max-width:560px;border:1px solid rgba(130,226,183,.35);border-radius:24px;padding:28px;background:#111f18;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+    h1{margin:0 0 10px;font-size:28px}p{color:#b7c4bb;line-height:1.5}.ok{color:#82e2b7;font-weight:800}.err{color:#ff7b68;font-weight:800}button{border:0;border-radius:14px;padding:13px 18px;font-weight:900;background:#82e2b7;color:#07120d;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Limpiando caché de Nexo</h1>
+    <p id="status">Preparando limpieza...</p>
+    <button id="go" hidden>Abrir Nexo</button>
+  </div>
+  <script>
+    async function clean(){
+      const status = document.getElementById('status');
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((reg) => reg.unregister()));
+        }
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((key) => caches.delete(key)));
+        }
+        status.innerHTML = '<span class="ok">Caché limpiada.</span> Ahora abre la app de nuevo.';
+        document.getElementById('go').hidden = false;
+      } catch (error) {
+        status.innerHTML = '<span class="err">No he podido limpiar todo.</span> Cierra el navegador y vuelve a abrir la app.';
+        document.getElementById('go').hidden = false;
+      }
+    }
+    document.getElementById('go').addEventListener('click', () => location.href = './');
+    clean();
+  </script>
+</body>
+</html>
