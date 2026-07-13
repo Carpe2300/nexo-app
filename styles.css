@@ -3140,3 +3140,91 @@ body[data-theme="dark"] {
     font-size: 18px !important;
   }
 }
+
+/* v1.26 - iPhone/Safari: dock pegado al borde inferior, sin tapar media pantalla */
+@media (max-width: 720px) {
+  :root {
+    --mobile-dock-height: 52px;
+    --mobile-content-clearance: 150px;
+  }
+
+  .app-shell,
+  body[data-active-screen] .app-shell {
+    padding-bottom: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px) + var(--mobile-content-clearance)) !important;
+  }
+
+  .app-shell::after {
+    height: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px) + 58px) !important;
+  }
+
+  .bottom-nav {
+    position: fixed !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 4px !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: none !important;
+    height: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px)) !important;
+    min-height: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px)) !important;
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    align-items: center !important;
+    gap: 2px !important;
+    border-radius: 22px 22px 18px 18px !important;
+    background: rgba(10, 18, 15, .82) !important;
+    border: 1px solid rgba(172, 232, 204, .13) !important;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .28) !important;
+    backdrop-filter: blur(18px) saturate(1.1) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(1.1) !important;
+  }
+
+  .bottom-nav-btn {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border-radius: 16px !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .bottom-nav-btn span {
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+
+  .bottom-nav-btn strong,
+  .bottom-nav-btn.active strong {
+    display: none !important;
+  }
+
+  .bottom-nav-btn.active {
+    background: linear-gradient(135deg, rgba(128, 220, 180, .95), rgba(102, 202, 160, .95)) !important;
+    box-shadow: 0 8px 18px rgba(91, 211, 164, .2) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --mobile-dock-height: 48px;
+    --mobile-content-clearance: 160px;
+  }
+
+  .bottom-nav {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 3px !important;
+    border-radius: 20px 20px 16px 16px !important;
+  }
+
+  .bottom-nav-btn {
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 14px !important;
+  }
+
+  .bottom-nav-btn span {
+    font-size: 17px !important;
+  }
+}
