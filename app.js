@@ -982,6 +982,78 @@ function reportRow(label, value, detail = "", tone = "neutral") {
   `;
 }
 
+function buildReportCopilot(current, previous) {
+  const spendable = current.spendable || Math.max(0, current.totalIncome - current.plan.savings);
+  const projectedOver = current.projectedMonthlySpend - spendable;
+  const projectedSavingsGap = current.projectedSavings - current.plan.savings;
+  const projectedRatio = spendable ? current.projectedMonthlySpend / spendable : 0;
+  const topCategory = Object.entries(current.categorySums).sort((a, b) => b[1] - a[1])[0];
+  const previousDiff = current.spent - previous.spent;
+  const dailySafe = current.calendar.remaining > 0
+    ? Math.max(0, (spendable - current.spent) / current.calendar.remaining)
+    : Math.max(0, spendable - current.spent);
+
+  let tone = "good";
+  let verdict = "Vas bien";
+  let action = "Mantén el ritmo actual y revisa solo gastos grandes antes de hacerlos.";
+  if (!current.totalIncome) {
+    tone = "neutral";
+    verdict = "Falta tu plan";
+    action = "Configura ingresos y ahorro objetivo para que Nexo pueda predecir bien.";
+  } else if (projectedOver > 0 || current.available < 0) {
+    tone = "bad";
+    verdict = "Te estás pasando";
+    const cut = Math.max(projectedOver, Math.abs(Math.min(0, current.available)));
+    action = `Recorta unos ${money.format(cut)} de aquí a final de mes para proteger tu ahorro.`;
+  } else if (projectedRatio > .82) {
+    tone = "watch";
+    verdict = "Vas justo";
+    action = `Intenta no pasar de ${money.format(dailySafe)} al día hasta final de mes.`;
+  }
+
+  const cards = [
+    {
+      label: "Gasto previsto",
+      value: money.format(current.projectedMonthlySpend),
+      detail: projectedOver > 0 ? `${money.format(projectedOver)} sobre tu margen` : "dentro del margen"
+    },
+    {
+      label: "Ahorro previsto",
+      value: money.format(current.projectedSavings),
+      detail: projectedSavingsGap >= 0 ? `${money.format(projectedSavingsGap)} por encima del objetivo` : `${money.format(Math.abs(projectedSavingsGap))} por debajo`
+    },
+    {
+      label: "Ritmo seguro",
+      value: money.format(dailySafe),
+      detail: "máximo diario recomendado"
+    }
+  ];
+
+  if (topCategory) {
+    cards.push({
+      label: "Categoría caliente",
+      value: topCategory[0],
+      detail: `${money.format(topCategory[1])} acumulados`
+    });
+  }
+
+  const tips = [];
+  if (topCategory && current.spent && topCategory[1] / current.spent > .32) {
+    tips.push(`${topCategory[0]} concentra mucho gasto. Si bajas ahí, notarás el cambio rápido.`);
+  }
+  if ((current.categorySums["Suscripciones"] || 0) > 0) {
+    tips.push(`Revisa suscripciones: suman ${money.format(current.categorySums["Suscripciones"])} este mes.`);
+  }
+  if (previous.spent) {
+    tips.push(previousDiff > 0
+      ? `Vas ${money.format(previousDiff)} por encima del mes anterior.`
+      : `Vas ${money.format(Math.abs(previousDiff))} mejor que el mes anterior.`);
+  }
+  if (!tips.length) tips.push("Añade algunos movimientos más y Nexo te dará avisos más finos.");
+
+  return { tone, verdict, action, cards, tips: tips.slice(0, 3) };
+}
+
 function renderMonthlyReport(current) {
   const hero = $("monthlyReportHero");
   if (!hero) return;
@@ -998,6 +1070,7 @@ function renderMonthlyReport(current) {
   const recurrent = current.recurringSpent || 0;
   const previousDiff = current.spent - previous.spent;
   const projectedDiff = current.projectedMonthlySpend - current.spent;
+  const copilot = buildReportCopilot(current, previous);
 
   hero.innerHTML = `
     <div>
@@ -1020,6 +1093,29 @@ function renderMonthlyReport(current) {
       <small>${escapeHtml(item.detail)}</small>
     </div>
   `).join("");
+
+  $("monthlyReportCopilot").innerHTML = `
+    <div class="report-copilot-head ${copilot.tone}">
+      <div>
+        <span>Copiloto del mes</span>
+        <strong>${escapeHtml(copilot.verdict)}</strong>
+        <small>${escapeHtml(copilot.action)}</small>
+      </div>
+      <b>${copilot.tone === "bad" ? "RIESGO" : copilot.tone === "watch" ? "CUIDADO" : copilot.tone === "neutral" ? "PLAN" : "BIEN"}</b>
+    </div>
+    <div class="report-copilot-cards">
+      ${copilot.cards.map((card) => `
+        <div>
+          <span>${escapeHtml(card.label)}</span>
+          <strong>${escapeHtml(card.value)}</strong>
+          <small>${escapeHtml(card.detail)}</small>
+        </div>
+      `).join("")}
+    </div>
+    <div class="report-copilot-tips">
+      ${copilot.tips.map((tip) => `<p>${escapeHtml(tip)}</p>`).join("")}
+    </div>
+  `;
 
   const categories = Object.entries(current.categorySums).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const categoryMax = Math.max(1, ...categories.map(([, value]) => value));
