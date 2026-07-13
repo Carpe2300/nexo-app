@@ -3028,3 +3028,115 @@ body[data-theme="dark"] {
     font-size: 8px !important;
   }
 }
+
+/* v1.25 - Dock móvil: no tapa contenido al hacer scroll */
+@media (max-width: 720px) {
+  :root {
+    --mobile-dock-height: 58px;
+    --mobile-dock-gap: 10px;
+    --mobile-content-clearance: 120px;
+  }
+
+  body {
+    padding-bottom: 0 !important;
+  }
+
+  .app-shell {
+    padding-bottom: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px) + var(--mobile-content-clearance)) !important;
+  }
+
+  body[data-active-screen] .app-shell {
+    padding-bottom: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px) + var(--mobile-content-clearance)) !important;
+  }
+
+  .app-shell::after {
+    content: "";
+    display: block;
+    height: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px) + 34px);
+  }
+
+  .bottom-nav {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: calc(var(--mobile-dock-gap) + env(safe-area-inset-bottom, 0px)) !important;
+    transform: translate3d(-50%, 0, 0) !important;
+    width: min(432px, calc(100vw - 24px)) !important;
+    height: var(--mobile-dock-height) !important;
+    min-height: var(--mobile-dock-height) !important;
+    padding: 6px !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+    border-radius: 24px !important;
+    background:
+      linear-gradient(135deg, rgba(22, 39, 32, .86), rgba(10, 18, 15, .9)) !important;
+    border: 1px solid rgba(172, 232, 204, .14) !important;
+    box-shadow:
+      0 14px 34px rgba(0, 0, 0, .34),
+      inset 0 1px 0 rgba(255, 255, 255, .07) !important;
+    backdrop-filter: blur(20px) saturate(1.1) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.1) !important;
+    z-index: 80 !important;
+  }
+
+  .bottom-nav-btn {
+    min-width: 0 !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 5px 2px !important;
+    border-radius: 18px !important;
+    gap: 0 !important;
+  }
+
+  .bottom-nav-btn span {
+    font-size: 20px !important;
+    line-height: 1 !important;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .22));
+  }
+
+  .bottom-nav-btn strong {
+    display: none !important;
+  }
+
+  .bottom-nav-btn.active {
+    background: linear-gradient(135deg, rgba(128, 220, 180, .95), rgba(102, 202, 160, .95)) !important;
+    color: #07130f !important;
+    box-shadow: 0 10px 24px rgba(91, 211, 164, .22) !important;
+  }
+
+  .bottom-nav-btn.active strong {
+    display: none !important;
+  }
+
+  section[data-screen]:last-of-type,
+  .dashboard-grid[data-screen],
+  .lower-grid[data-screen],
+  .analytics-grid[data-screen],
+  .smart-grid[data-screen],
+  .report-grid[data-screen],
+  .bank-screen-grid[data-screen] {
+    scroll-margin-bottom: calc(var(--mobile-dock-height) + env(safe-area-inset-bottom, 0px) + 80px) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --mobile-dock-height: 54px;
+    --mobile-content-clearance: 132px;
+  }
+
+  .bottom-nav {
+    width: min(410px, calc(100vw - 18px)) !important;
+    padding: 5px !important;
+    border-radius: 22px !important;
+  }
+
+  .bottom-nav-btn {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .bottom-nav-btn span {
+    font-size: 18px !important;
+  }
+}
