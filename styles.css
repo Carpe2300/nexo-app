@@ -3356,6 +3356,71 @@ body[data-theme="dark"] {
   flex-wrap: wrap;
 }
 
+.bank-movement-item {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+}
+
+.bank-candidate-check {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+}
+
+.bank-candidate-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bank-candidate-check span {
+  width: 22px;
+  height: 22px;
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--green) 40%, var(--line));
+  background: rgba(255,255,255,.04);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.bank-candidate-check input:checked + span {
+  background: linear-gradient(135deg, #7ce8bd, #58dca9);
+  border-color: transparent;
+}
+
+.bank-candidate-check input:checked + span::after {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #07130f;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.bank-review-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.bank-review-controls select {
+  min-height: 34px;
+  max-width: 160px;
+  border: 1px solid color-mix(in srgb, var(--green) 24%, var(--line));
+  border-radius: 12px;
+  padding: 0 28px 0 10px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.bank-movement-item.duplicate .bank-candidate-check span,
+.bank-review-controls select:disabled {
+  opacity: .5;
+}
+
 @media (min-width: 821px) {
   .bank-review-panel {
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -3371,6 +3436,24 @@ body[data-theme="dark"] {
     min-height: 98px;
     padding: 12px;
     border-radius: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .bank-movement-item {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: flex-start;
+  }
+
+  .bank-movement-item > b {
+    grid-column: 3;
+    justify-self: start;
+    margin-top: 6px;
+  }
+
+  .bank-review-controls select {
+    max-width: 100%;
+    flex: 1 1 118px;
   }
 }
 

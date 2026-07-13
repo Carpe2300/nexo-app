@@ -60,6 +60,7 @@ function ensureStateShape() {
   state.hiddenDefaultCategories = state.hiddenDefaultCategories || [];
   state.importHistory = state.importHistory || [];
   state.bank = state.bank || { provider: "demo", connected: false, lastSyncAt: "", candidates: [] };
+  state.bank.selectedCandidateIds = state.bank.selectedCandidateIds || [];
 }
 
 function customCategoriesByType(type) {
@@ -4076,6 +4077,41 @@ function bankMovementKind(item) {
   return { label: "Gasto", className: "expense", icon: "↘" };
 }
 
+function bankCategoryOptions(type, selected) {
+  const categories = type === "income" ? incomeCategories() : expenseCategories();
+  return categories.map((category) => `<option value="${escapeHtml(category)}"${category === selected ? " selected" : ""}>${escapeHtml(category)}</option>`).join("");
+}
+
+function syncBankSelectionWithCandidates(candidates, existingKeys) {
+  ensureStateShape();
+  const freshIds = candidates.filter((item) => !existingKeys.has(bankCandidateKey(item))).map((item) => item.id);
+  const current = new Set(state.bank.selectedCandidateIds || []);
+  state.bank.selectedCandidateIds = freshIds.filter((id) => current.size ? current.has(id) : true);
+  return new Set(state.bank.selectedCandidateIds);
+}
+
+function updateBankCandidate(candidateId, patch) {
+  ensureStateShape();
+  const candidate = (state.bank.candidates || []).find((item) => item.id === candidateId);
+  if (!candidate) return;
+  Object.assign(candidate, patch);
+  if (patch.type && !patch.category) {
+    candidate.category = patch.type === "income" ? "Otros ingresos" : "Otros";
+  }
+  saveState();
+  renderBankScreen();
+}
+
+function toggleBankCandidate(candidateId, checked) {
+  ensureStateShape();
+  const selected = new Set(state.bank.selectedCandidateIds || []);
+  if (checked) selected.add(candidateId);
+  else selected.delete(candidateId);
+  state.bank.selectedCandidateIds = [...selected];
+  saveState();
+  renderBankScreen();
+}
+
 function renderBankScreen() {
   const bank = state.bank || { provider: "demo", connected: false, candidates: [] };
   const candidates = bank.candidates || [];
@@ -4083,9 +4119,11 @@ function renderBankScreen() {
   if (!badge) return;
   const existingKeys = new Set(state.expenses.map(bankCandidateKey));
   const freshCandidates = candidates.filter((item) => !existingKeys.has(bankCandidateKey(item)));
+  const selectedCandidateIds = syncBankSelectionWithCandidates(candidates, existingKeys);
+  const selectedFreshCandidates = freshCandidates.filter((item) => selectedCandidateIds.has(item.id));
   const duplicateCount = Math.max(0, candidates.length - freshCandidates.length);
-  const freshExpense = freshCandidates.filter((item) => item.type !== "income").reduce((sum, item) => sum + item.amount, 0);
-  const freshIncome = freshCandidates.filter((item) => item.type === "income").reduce((sum, item) => sum + item.amount, 0);
+  const freshExpense = selectedFreshCandidates.filter((item) => item.type !== "income").reduce((sum, item) => sum + item.amount, 0);
+  const freshIncome = selectedFreshCandidates.filter((item) => item.type === "income").reduce((sum, item) => sum + item.amount, 0);
   const netImpact = Math.max(0, freshExpense - freshIncome);
   const lastSyncText = bank.lastSyncAt ? formatSyncDate(bank.lastSyncAt) : "sin sincronizar";
 
@@ -4096,14 +4134,14 @@ function renderBankScreen() {
     ? `Conectado · última sincronización ${lastSyncText}.`
     : "Prueba el flujo completo sin meter datos reales ni credenciales.";
   $("bankSyncLabel").textContent = bank.lastSyncAt ? `Última ${lastSyncText}` : "Pendiente";
-  $("importDemoBankBtn").disabled = !freshCandidates.length;
-  $("importDemoBankBtn").textContent = freshCandidates.length ? `Importar ${freshCandidates.length} a Nexo` : "Nada nuevo que importar";
+  $("importDemoBankBtn").disabled = !selectedFreshCandidates.length;
+  $("importDemoBankBtn").textContent = selectedFreshCandidates.length ? `Importar ${selectedFreshCandidates.length} seleccionados` : "Nada seleccionado";
 
   $("bankReviewPanel").innerHTML = `
     <div class="bank-review-stat">
       <span>Nuevos</span>
-      <strong>${freshCandidates.length}</strong>
-      <small>listos para importar</small>
+      <strong>${selectedFreshCandidates.length}/${freshCandidates.length}</strong>
+      <small>seleccionados para importar</small>
     </div>
     <div class="bank-review-stat">
       <span>Gasto</span>
@@ -4148,13 +4186,27 @@ function renderBankScreen() {
   $("bankMovementList").innerHTML = candidates.map((item) => {
     const duplicate = existingKeys.has(bankCandidateKey(item));
     const kind = bankMovementKind(item);
+    const selected = selectedCandidateIds.has(item.id) && !duplicate;
     return `
       <div class="bank-movement-item${duplicate ? " duplicate" : ""}">
+        <label class="bank-candidate-check">
+          <input type="checkbox" data-bank-select="${escapeHtml(item.id)}"${selected ? " checked" : ""}${duplicate ? " disabled" : ""}>
+          <span></span>
+        </label>
         <div class="bank-movement-icon ${kind.className}">${kind.icon}</div>
         <div>
           <strong>${escapeHtml(item.name)} <em class="bank-kind-pill ${kind.className}">${escapeHtml(kind.label)}</em></strong>
           <span>${escapeHtml(item.account)} · ${escapeHtml(item.category)} · ${escapeHtml(item.date)}</span>
           <small>${duplicate ? "Ya existe en movimientos: no se importará otra vez" : escapeHtml(item.rawDescription || "")}</small>
+          <div class="bank-review-controls">
+            <select data-bank-type="${escapeHtml(item.id)}"${duplicate ? " disabled" : ""}>
+              <option value="expense"${item.type !== "income" ? " selected" : ""}>Gasto</option>
+              <option value="income"${item.type === "income" ? " selected" : ""}>Entrada</option>
+            </select>
+            <select data-bank-category="${escapeHtml(item.id)}"${duplicate ? " disabled" : ""}>
+              ${bankCategoryOptions(item.type === "income" ? "income" : "expense", item.category)}
+            </select>
+          </div>
         </div>
         <b class="${item.type === "income" ? "amount-income" : "amount-expense"}">${item.type === "income" ? "+" : "−"}${money.format(item.amount)}</b>
       </div>`;
@@ -4194,6 +4246,7 @@ function syncDemoBank() {
   if (!state.bank.connected) state.bank.connected = true;
   state.bank.provider = "demo";
   state.bank.candidates = demoBankMovements();
+  state.bank.selectedCandidateIds = state.bank.candidates.map((item) => item.id);
   state.bank.lastSyncAt = new Date().toISOString();
   saveState();
   render();
@@ -4209,10 +4262,11 @@ function importDemoBankMovements() {
     return;
   }
   const existingKeys = new Set(state.expenses.map(bankCandidateKey));
+  const selectedIds = new Set(state.bank.selectedCandidateIds || []);
   const batchId = `bank-demo-${Date.now()}`;
   const nowIso = new Date().toISOString();
   const toImport = candidates
-    .filter((item) => !existingKeys.has(bankCandidateKey(item)))
+    .filter((item) => selectedIds.has(item.id) && !existingKeys.has(bankCandidateKey(item)))
     .map((item) => ({
       id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       name: item.name,
@@ -4247,6 +4301,22 @@ function initBankScreen() {
   $("connectDemoBankBtn")?.addEventListener("click", connectDemoBank);
   $("syncDemoBankBtn")?.addEventListener("click", syncDemoBank);
   $("importDemoBankBtn")?.addEventListener("click", importDemoBankMovements);
+  $("bankMovementList")?.addEventListener("change", (event) => {
+    const selectId = event.target?.dataset?.bankSelect;
+    const typeId = event.target?.dataset?.bankType;
+    const categoryId = event.target?.dataset?.bankCategory;
+    if (selectId) {
+      toggleBankCandidate(selectId, event.target.checked);
+      return;
+    }
+    if (typeId) {
+      updateBankCandidate(typeId, { type: event.target.value, category: event.target.value === "income" ? "Otros ingresos" : "Otros" });
+      return;
+    }
+    if (categoryId) {
+      updateBankCandidate(categoryId, { category: event.target.value });
+    }
+  });
   checkBankBackendStatus();
 }
 
