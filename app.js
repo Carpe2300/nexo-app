@@ -3362,23 +3362,7 @@ function looksLikeCompleteBankMovement(line) {
 
 function loadPdfJs() {
   if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
-  if (window.__pdfJsLoading) return window.__pdfJsLoading;
-  window.__pdfJsLoading = new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-    script.onload = () => {
-      const lib = window.pdfjsLib || globalThis.pdfjsLib;
-      if (!lib) {
-        reject(new Error("no se ha cargado el lector PDF"));
-        return;
-      }
-      lib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-      resolve(lib);
-    };
-    script.onerror = () => reject(new Error("no he podido cargar el lector PDF. Necesitas conexión a internet para importar PDF."));
-    document.head.appendChild(script);
-  });
-  return window.__pdfJsLoading;
+  return Promise.reject(new Error("lector PDF externo desactivado por seguridad. Usa CSV o el conversor local."));
 }
 
 function parsePdfBankLines(lines) {

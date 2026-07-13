@@ -1,0 +1,12 @@
+*.ps1
+*.cmd
+*.bat
+.env
+.env.*
+backend/
+tools/
+scripts/
+node_modules/
+*.log
+*_SECRET*
+*_PRIVATE*

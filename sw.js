@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nexo-v1.31-report-copilot';
+const CACHE_NAME = 'nexo-v1.32-public-security';
 const APP_ASSETS = [
   './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
   './assets/icons/icon.svg', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png',
