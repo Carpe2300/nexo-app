@@ -4283,6 +4283,25 @@ function initMobileAccessHelp() {
   });
 }
 
+function initMobileViewportDock() {
+  const root = document.documentElement;
+  const updateDockOffset = () => {
+    const viewport = window.visualViewport;
+    const layoutHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const visualHeight = viewport?.height || layoutHeight;
+    const visualTop = viewport?.offsetTop || 0;
+    const bottomOffset = Math.max(0, layoutHeight - visualHeight - visualTop);
+    const safeOffset = Math.min(150, Math.round(bottomOffset));
+    root.style.setProperty("--browser-bottom-offset", `${safeOffset}px`);
+  };
+
+  updateDockOffset();
+  window.addEventListener("resize", updateDockOffset, { passive: true });
+  window.addEventListener("orientationchange", () => setTimeout(updateDockOffset, 250), { passive: true });
+  window.visualViewport?.addEventListener("resize", updateDockOffset, { passive: true });
+  window.visualViewport?.addEventListener("scroll", updateDockOffset, { passive: true });
+}
+
 function initMobileNavigation() {
   const navButtons = [...document.querySelectorAll("[data-nav-screen]")];
   const validScreens = new Set(navButtons.map((button) => button.dataset.navScreen));
@@ -4297,6 +4316,7 @@ renderEmojiSuggestions();
 initEvents();
 initDataTools();
 initInstallPrompt();
+initMobileViewportDock();
 initMobileNavigation();
 initMobileQuickActions();
 initMobileAccessHelp();

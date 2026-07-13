@@ -3161,7 +3161,7 @@ body[data-theme="dark"] {
     position: fixed !important;
     left: 10px !important;
     right: 10px !important;
-    bottom: 4px !important;
+    bottom: calc(4px - var(--browser-bottom-offset, 0px)) !important;
     transform: none !important;
     width: auto !important;
     max-width: none !important;
@@ -3214,7 +3214,7 @@ body[data-theme="dark"] {
   .bottom-nav {
     left: 8px !important;
     right: 8px !important;
-    bottom: 3px !important;
+    bottom: calc(3px - var(--browser-bottom-offset, 0px)) !important;
     border-radius: 20px 20px 16px 16px !important;
   }
 
@@ -3226,5 +3226,12 @@ body[data-theme="dark"] {
 
   .bottom-nav-btn span {
     font-size: 17px !important;
+  }
+}
+
+/* v1.27 - Safari visualViewport corrige la barra cuando el navegador la empuja hacia arriba */
+@media (max-width: 720px) {
+  .bottom-nav {
+    bottom: calc(4px - var(--browser-bottom-offset, 0px)) !important;
   }
 }
