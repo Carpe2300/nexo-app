@@ -4098,8 +4098,37 @@ function updateBankCandidate(candidateId, patch) {
   if (patch.type && !patch.category) {
     candidate.category = patch.type === "income" ? "Otros ingresos" : "Otros";
   }
+  learnBankRuleFromCandidate(candidate);
   saveState();
   renderBankScreen();
+}
+
+function learnBankRuleFromCandidate(candidate) {
+  const source = candidate.rawDescription || candidate.name;
+  const keyword = suggestRuleKeyword(source, candidate.name);
+  if (!keyword) return;
+  const before = (state.rules || []).length;
+  addRuleFromMovement({
+    name: candidate.name,
+    category: candidate.category,
+    type: candidate.type,
+    originalDescription: source
+  });
+  applyBankRulesToCandidates(keyword, candidate);
+  const after = (state.rules || []).length;
+  toast(after > before ? `Regla aprendida: ${keyword}` : `Regla actualizada: ${keyword}`, "success");
+}
+
+function applyBankRulesToCandidates(keyword, learnedCandidate) {
+  const normalizedKeyword = normalizeHeader(keyword);
+  (state.bank.candidates || []).forEach((item) => {
+    if (item.id === learnedCandidate.id) return;
+    const text = normalizeHeader(`${item.rawDescription || ""} ${item.name || ""}`);
+    if (!text.includes(normalizedKeyword)) return;
+    item.category = learnedCandidate.category;
+    item.type = learnedCandidate.type;
+    item.name = learnedCandidate.name || item.name;
+  });
 }
 
 function toggleBankCandidate(candidateId, checked) {
@@ -4187,6 +4216,7 @@ function renderBankScreen() {
     const duplicate = existingKeys.has(bankCandidateKey(item));
     const kind = bankMovementKind(item);
     const selected = selectedCandidateIds.has(item.id) && !duplicate;
+    const learnedRule = findCustomRule(item.rawDescription || item.name, item.type);
     return `
       <div class="bank-movement-item${duplicate ? " duplicate" : ""}">
         <label class="bank-candidate-check">
@@ -4195,7 +4225,7 @@ function renderBankScreen() {
         </label>
         <div class="bank-movement-icon ${kind.className}">${kind.icon}</div>
         <div>
-          <strong>${escapeHtml(item.name)} <em class="bank-kind-pill ${kind.className}">${escapeHtml(kind.label)}</em></strong>
+          <strong>${escapeHtml(item.name)} <em class="bank-kind-pill ${kind.className}">${escapeHtml(kind.label)}</em>${learnedRule ? `<em class="bank-kind-pill learned">Aprendido</em>` : ""}</strong>
           <span>${escapeHtml(item.account)} · ${escapeHtml(item.category)} · ${escapeHtml(item.date)}</span>
           <small>${duplicate ? "Ya existe en movimientos: no se importará otra vez" : escapeHtml(item.rawDescription || "")}</small>
           <div class="bank-review-controls">

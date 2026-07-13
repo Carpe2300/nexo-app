@@ -3349,6 +3349,12 @@ body[data-theme="dark"] {
   border-color: rgba(142, 199, 255, .25);
 }
 
+.bank-kind-pill.learned {
+  color: #7ce8bd;
+  background: rgba(124, 232, 189, .14);
+  border-color: rgba(124, 232, 189, .32);
+}
+
 .bank-movement-item strong {
   display: flex;
   align-items: center;
