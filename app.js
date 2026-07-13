@@ -4065,6 +4065,17 @@ function bankCandidateKey(item) {
   return `${item.date}|${item.type}|${Number(item.amount).toFixed(2)}|${normalizeHeader(item.name || item.rawDescription || "").slice(0, 38)}`;
 }
 
+function bankMovementKind(item) {
+  const text = normalizeHeader(`${item.name || ""} ${item.rawDescription || ""} ${item.category || ""}`);
+  if (item.type === "income" && /BIZUM/.test(text)) return { label: "Bizum", className: "bizum", icon: "↩" };
+  if (item.type === "income" && /(DEVOLUCION|ABONO|REEMBOLSO|REFUND)/.test(text)) return { label: "Devolución", className: "refund", icon: "↩" };
+  if (item.type === "income") return { label: "Entrada", className: "income", icon: "↗" };
+  if (/(NETFLIX|SPOTIFY|DISNEY|PRIME|MAX|YOUTUBE|PAYPAL)/.test(text)) return { label: "Suscripción", className: "subscription", icon: "◎" };
+  if (/(MERCADONA|GLOVO|RESTAURANTE|CARREFOUR|LIDL|ALDI)/.test(text)) return { label: "Compra", className: "purchase", icon: "↘" };
+  if (/(REPSOL|WAYLET|CEPSA|SHELL|BP)/.test(text)) return { label: "Coche", className: "transport", icon: "↘" };
+  return { label: "Gasto", className: "expense", icon: "↘" };
+}
+
 function renderBankScreen() {
   const bank = state.bank || { provider: "demo", connected: false, candidates: [] };
   const candidates = bank.candidates || [];
@@ -4075,14 +4086,16 @@ function renderBankScreen() {
   const duplicateCount = Math.max(0, candidates.length - freshCandidates.length);
   const freshExpense = freshCandidates.filter((item) => item.type !== "income").reduce((sum, item) => sum + item.amount, 0);
   const freshIncome = freshCandidates.filter((item) => item.type === "income").reduce((sum, item) => sum + item.amount, 0);
+  const netImpact = Math.max(0, freshExpense - freshIncome);
+  const lastSyncText = bank.lastSyncAt ? formatSyncDate(bank.lastSyncAt) : "sin sincronizar";
 
-  badge.textContent = bank.connected ? "Conectado demo" : "Demo";
+  badge.textContent = bank.connected ? "Demo conectado" : "Modo demo";
   badge.classList.toggle("connected", !!bank.connected);
-  $("bankProviderName").textContent = bank.provider === "real" ? "Open Banking real" : "Demo local";
+  $("bankProviderName").textContent = bank.provider === "real" ? "Open Banking real" : "Simulación segura";
   $("bankProviderStatus").textContent = bank.connected
-    ? "Banco demo conectado. Puedes sincronizar e importar movimientos."
-    : "GoCardless queda aparcado; puedes probar el flujo completo con simulación.";
-  $("bankSyncLabel").textContent = bank.lastSyncAt ? `Sync ${formatSyncDate(bank.lastSyncAt)}` : "Pendiente";
+    ? `Conectado · última sincronización ${lastSyncText}.`
+    : "Prueba el flujo completo sin meter datos reales ni credenciales.";
+  $("bankSyncLabel").textContent = bank.lastSyncAt ? `Última ${lastSyncText}` : "Pendiente";
   $("importDemoBankBtn").disabled = !freshCandidates.length;
   $("importDemoBankBtn").textContent = freshCandidates.length ? `Importar ${freshCandidates.length} a Nexo` : "Nada nuevo que importar";
 
@@ -4101,6 +4114,11 @@ function renderBankScreen() {
       <span>Entradas</span>
       <strong>${money.format(freshIncome)}</strong>
       <small>Bizum/devoluciones</small>
+    </div>
+    <div class="bank-review-stat featured">
+      <span>Impacto real</span>
+      <strong>${money.format(netImpact)}</strong>
+      <small>gasto tras compensar entradas</small>
     </div>
     <div class="bank-review-stat">
       <span>Duplicados</span>
@@ -4122,20 +4140,21 @@ function renderBankScreen() {
       <div class="bank-empty-state">
         <span>🏦</span>
         <strong>Aún no hay movimientos sincronizados</strong>
-        <p>Pulsa “Conectar banco demo” y luego “Sincronizar movimientos”.</p>
+        <p>Conecta el banco demo y sincroniza. Aquí verás compras, Bizum, devoluciones y duplicados antes de importarlos.</p>
       </div>`;
     return;
   }
 
   $("bankMovementList").innerHTML = candidates.map((item) => {
     const duplicate = existingKeys.has(bankCandidateKey(item));
+    const kind = bankMovementKind(item);
     return `
       <div class="bank-movement-item${duplicate ? " duplicate" : ""}">
-        <div class="bank-movement-icon">${item.type === "income" ? "↗" : "↘"}</div>
+        <div class="bank-movement-icon ${kind.className}">${kind.icon}</div>
         <div>
-          <strong>${escapeHtml(item.name)}</strong>
+          <strong>${escapeHtml(item.name)} <em class="bank-kind-pill ${kind.className}">${escapeHtml(kind.label)}</em></strong>
           <span>${escapeHtml(item.account)} · ${escapeHtml(item.category)} · ${escapeHtml(item.date)}</span>
-          <small>${duplicate ? "Ya existe en movimientos" : escapeHtml(item.rawDescription || "")}</small>
+          <small>${duplicate ? "Ya existe en movimientos: no se importará otra vez" : escapeHtml(item.rawDescription || "")}</small>
         </div>
         <b class="${item.type === "income" ? "amount-income" : "amount-expense"}">${item.type === "income" ? "+" : "−"}${money.format(item.amount)}</b>
       </div>`;

@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icons/icon-192.png?v=nexo-black-20260711" type="image/png">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=nexo-black-20260711">
-  <link rel="stylesheet" href="styles.css?v=1.27">
+  <link rel="stylesheet" href="styles.css?v=1.28">
 </head>
 <body data-theme="light" data-risk="safe">
   <main class="app-shell">
@@ -414,14 +414,14 @@
         <div class="card-heading">
           <div>
             <p class="eyebrow">BANCO</p>
-            <h2>Tu cuenta, sin depender de GoCardless</h2>
-            <p class="section-copy">Nexo queda preparado para Open Banking real, pero ahora puedes probar todo el flujo con un banco demo: compras, Bizum, devoluciones, nómina y suscripciones.</p>
+            <h2>Banco automático, sin líos</h2>
+            <p class="section-copy">Primero lo probamos en modo seguro: sincroniza movimientos demo, revisa compras, Bizum y devoluciones, y luego impórtalos a Nexo sin duplicados.</p>
           </div>
           <span id="bankConnectionBadge" class="bank-connection-badge">Demo</span>
         </div>
         <div class="bank-provider-panel">
           <div>
-            <span>Proveedor actual</span>
+            <span>Modo actual</span>
             <strong id="bankProviderName">Demo local</strong>
             <small id="bankProviderStatus">Sin credenciales reales. La app funciona en modo simulación.</small>
           </div>
@@ -430,6 +430,12 @@
             <strong id="bankBackendStatus">Comprobando...</strong>
             <small id="bankBackendHint">Nexo mirará si existe http://localhost:8787/health.</small>
           </div>
+        </div>
+        <div class="bank-flow-steps" aria-label="Flujo de banco">
+          <div><strong>1</strong><span>Conecta</span><small>Activa el banco demo.</small></div>
+          <div><strong>2</strong><span>Sincroniza</span><small>Nexo detecta compras e ingresos.</small></div>
+          <div><strong>3</strong><span>Revisa</span><small>Se separan gastos, Bizum y duplicados.</small></div>
+          <div><strong>4</strong><span>Importa</span><small>Entran limpios al presupuesto.</small></div>
         </div>
         <div class="bank-actions">
           <button id="connectDemoBankBtn" class="primary-btn" type="button">Conectar banco demo</button>
@@ -441,7 +447,7 @@
 
       <article class="card bank-accounts-card">
         <p class="eyebrow">CUENTAS</p>
-        <h2>Bancos preparados</h2>
+        <h2>Cuentas conectables</h2>
         <div id="bankAccountList" class="bank-account-list"></div>
       </article>
 
@@ -450,7 +456,7 @@
           <div>
             <p class="eyebrow">SINCRONIZACIÓN</p>
             <h2>Movimientos detectados</h2>
-            <p class="section-copy">Estos movimientos son candidatos. Al importarlos, Nexo evita duplicados y los clasifica.</p>
+            <p class="section-copy">Revisa qué entra como gasto y qué compensa gasto real, como Bizum o devoluciones.</p>
           </div>
           <span id="bankSyncLabel" class="bank-sync-label">Pendiente</span>
         </div>
@@ -459,8 +465,8 @@
 
       <article class="card bank-provider-card">
         <p class="eyebrow">PROVEEDOR REAL</p>
-        <h2>La pieza intercambiable</h2>
-        <p class="section-copy">GoCardless ahora pide alta dentro de su plataforma de pagos/negocio. Para Nexo lo sensato es mantener la capa bancaria separada y enchufar el proveedor que nos deje operar mejor.</p>
+        <h2>Después enchufamos Open Banking</h2>
+        <p class="section-copy">La app ya trabaja con una capa bancaria separada. Cuando tengamos proveedor real, solo cambiamos esa pieza: Nexo seguirá clasificando compras, ingresos, Bizum y devoluciones igual.</p>
         <div class="provider-options">
           <span>Salt Edge</span>
           <span>Tink</span>
@@ -505,7 +511,7 @@
 
     <section class="card app-version-card" data-screen="settings">
       <p class="eyebrow">VERSIÓN</p>
-      <h2>Nexo v1.27 dock ajustado para iPhone</h2>
+      <h2>Nexo v1.28 Banco más claro</h2>
       <p class="section-copy">Versión con pantalla Banco más limpia en móvil, revisión previa de movimientos, modo demo, nuevo logo, PWA, modo WiFi y guía clara para automatización bancaria.</p>
     </section>
 
@@ -851,6 +857,6 @@
   </nav>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=1.27"></script>
+  <script src="app.js?v=1.28"></script>
 </body>
 </html>

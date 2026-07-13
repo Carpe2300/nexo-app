@@ -3235,3 +3235,159 @@ body[data-theme="dark"] {
     bottom: calc(4px - var(--browser-bottom-offset, 0px)) !important;
   }
 }
+
+/* v1.28 - Banco más claro, tipo flujo real de importación */
+.bank-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.bank-flow-steps div {
+  position: relative;
+  overflow: hidden;
+  min-height: 112px;
+  border: 1px solid color-mix(in srgb, var(--green) 24%, var(--line));
+  border-radius: 22px;
+  padding: 13px;
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--green) 18%, transparent), transparent 44%),
+    color-mix(in srgb, var(--card) 90%, transparent);
+}
+
+.bank-flow-steps strong {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 12px;
+  color: #07130f;
+  background: linear-gradient(135deg, #7ce8bd, #58dca9);
+  box-shadow: 0 10px 22px rgba(88, 220, 169, .18);
+}
+
+.bank-flow-steps span {
+  display: block;
+  margin-top: 11px;
+  font-weight: 950;
+  letter-spacing: -.04em;
+}
+
+.bank-flow-steps small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+.bank-review-stat.featured {
+  border-color: color-mix(in srgb, var(--green) 42%, var(--line));
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--green) 22%, transparent), transparent 52%),
+    color-mix(in srgb, var(--green) 8%, var(--card));
+}
+
+.bank-movement-icon.bizum,
+.bank-movement-icon.refund,
+.bank-movement-icon.income {
+  color: #07351f;
+  background: linear-gradient(135deg, #7ce8bd, #58dca9);
+}
+
+.bank-movement-icon.subscription {
+  color: #2b1645;
+  background: linear-gradient(135deg, #c8a7ff, #9fd0ff);
+}
+
+.bank-movement-icon.purchase {
+  color: #402208;
+  background: linear-gradient(135deg, #ffd979, #ffad7a);
+}
+
+.bank-movement-icon.transport {
+  color: #06243d;
+  background: linear-gradient(135deg, #9fd0ff, #6fb3ff);
+}
+
+.bank-kind-pill {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: .02em;
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green) 28%, transparent);
+}
+
+.bank-kind-pill.bizum,
+.bank-kind-pill.refund,
+.bank-kind-pill.income {
+  color: #58dca9;
+}
+
+.bank-kind-pill.subscription {
+  color: #bda2ff;
+  background: rgba(189, 162, 255, .12);
+  border-color: rgba(189, 162, 255, .25);
+}
+
+.bank-kind-pill.purchase {
+  color: #ffbf68;
+  background: rgba(255, 191, 104, .12);
+  border-color: rgba(255, 191, 104, .25);
+}
+
+.bank-kind-pill.transport {
+  color: #8ec7ff;
+  background: rgba(142, 199, 255, .12);
+  border-color: rgba(142, 199, 255, .25);
+}
+
+.bank-movement-item strong {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 821px) {
+  .bank-review-panel {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .bank-flow-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bank-flow-steps div {
+    min-height: 98px;
+    padding: 12px;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .bank-flow-steps {
+    gap: 8px;
+  }
+
+  .bank-flow-steps div {
+    min-height: 92px;
+  }
+
+  .bank-flow-steps span {
+    font-size: .92rem;
+  }
+
+  .bank-flow-steps small {
+    font-size: 11px;
+  }
+}
