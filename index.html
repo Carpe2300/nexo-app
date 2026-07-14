@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icons/icon-192.png?v=nexo-black-20260711" type="image/png">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=nexo-black-20260711">
-  <link rel="stylesheet" href="styles.css?v=1.34">
+  <link rel="stylesheet" href="styles.css?v=1.35">
 </head>
 <body data-theme="light" data-risk="safe">
   <main class="app-shell">
@@ -459,8 +459,8 @@
           <div class="open-banking-head">
             <div>
               <span>OPEN BANKING REAL</span>
-              <strong>Conexion segura por consentimiento</strong>
-              <small>Las claves viven solo en el backend local. Nexo nunca pide tu contrasena del banco.</small>
+              <strong>Conexion segura con Salt Edge</strong>
+              <small>Las claves viven solo en el backend local. Nexo abre el widget seguro del proveedor y nunca guarda tu contrasena del banco.</small>
             </div>
             <button id="closeOpenBankingPanelBtn" class="mini-link-btn" type="button">Cerrar</button>
           </div>
@@ -485,8 +485,8 @@
             <button id="syncRealBankBtn" class="secondary-btn" type="button">Sincronizar real</button>
           </div>
           <div id="bankInstitutionList" class="bank-institution-list"></div>
-          <label class="open-banking-reference">ID de conexion / requisition
-            <input id="bankRequisitionInput" type="text" placeholder="Se rellena al autorizar, o pegalo aqui">
+          <label class="open-banking-reference">ID de conexion Salt Edge
+            <input id="bankRequisitionInput" type="text" placeholder="Pega aqui el connection_id tras autorizar">
           </label>
           <p id="openBankingStatus" class="open-banking-status">Abre el panel cuando tengas proveedor configurado en el backend.</p>
         </div>
@@ -559,8 +559,8 @@
 
     <section class="card app-version-card" data-screen="settings">
       <p class="eyebrow">VERSIÓN</p>
-      <h2>Nexo v1.34 Open Banking</h2>
-      <p class="section-copy">Versión con panel real de Open Banking: carga bancos, autoriza consentimiento, recupera cuentas y sincroniza movimientos desde backend local seguro.</p>
+      <h2>Nexo v1.35 Salt Edge</h2>
+      <p class="section-copy">Versión preparada para Salt Edge: proveedores, widget de conexión, cuentas y sincronización con connection_id desde backend local seguro.</p>
     </section>
 
     <section class="card rules-card" data-screen="settings">
@@ -905,6 +905,6 @@
   </nav>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=1.33"></script>
+  <script src="app.js?v=1.35"></script>
 </body>
 </html>

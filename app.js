@@ -4318,7 +4318,7 @@ function toggleOpenBankingPanel(force) {
   if (!panel.hidden) {
     $("bankRequisitionInput").value = state.bank.real?.requisitionId || "";
     renderInstitutionList();
-    setOpenBankingStatus(state.bank.real?.configured ? "Backend listo. Carga bancos o pega una requisition existente." : "Backend activo, pero aun faltan claves reales del proveedor.", state.bank.real?.configured ? "success" : "warning");
+    setOpenBankingStatus(state.bank.real?.configured ? "Backend Salt Edge listo. Carga bancos o pega un connection_id existente." : "Backend activo, pero faltan SALTEDGE_APP_ID y SALTEDGE_SECRET.", state.bank.real?.configured ? "success" : "warning");
   }
 }
 
@@ -4359,12 +4359,12 @@ async function startOpenBankingConsent() {
     });
     state.bank.provider = "real";
     state.bank.connected = true;
-    state.bank.real.requisitionId = data.requisition_id || "";
+    state.bank.real.requisitionId = data.connection_id || "";
     state.bank.real.selectedInstitutionName = institution.name || institution.id;
     saveState();
-    $("bankRequisitionInput").value = state.bank.real.requisitionId;
+    $("bankRequisitionInput").value = state.bank.real.requisitionId || "";
     renderBankScreen();
-    setOpenBankingStatus("Consentimiento creado. Se abre la web del banco/proveedor en una pestana nueva.", "success");
+    setOpenBankingStatus("Widget Salt Edge creado. Autoriza el banco y, al volver, pega aqui el connection_id si no se rellena solo.", "success");
     if (data.link) window.open(data.link, "_blank", "noopener,noreferrer");
   } catch (error) {
     setOpenBankingStatus(`No se pudo crear consentimiento: ${error.message}`, "danger");
@@ -4375,7 +4375,7 @@ async function loadRealBankAccounts() {
   ensureStateShape();
   const requisitionId = ($("bankRequisitionInput")?.value || state.bank.real.requisitionId || "").trim();
   if (!requisitionId) {
-    toast("Pega o crea primero una requisition", "info");
+    toast("Pega o crea primero un connection_id", "info");
     return;
   }
   setOpenBankingStatus("Cargando cuentas autorizadas...");
@@ -4406,7 +4406,7 @@ async function syncRealBank() {
   try {
     const data = await openBankingJson("/api/open-banking/sync", {
       method: "POST",
-      body: { account_ids: accountIds }
+      body: { account_ids: accountIds, connection_id: state.bank.real.requisitionId || $("bankRequisitionInput")?.value || "" }
     });
     state.bank.provider = "real";
     state.bank.connected = true;
