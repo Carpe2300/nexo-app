@@ -12,6 +12,7 @@ const DEMO_KEY = "nexo-demo-mode";
 const DEMO_FALLBACK_KEYS = ["mi-futuro-demo-mode"];
 const ACTIVE_SCREEN_KEY = "nexo-active-screen";
 const ACTIVE_SCREEN_FALLBACK_KEYS = ["mi-futuro-active-screen"];
+const OPEN_BANKING_API = "http://localhost:8787";
 
 const recurringIcons = {
   "Casa": "⌂", "Coche": "◇", "Agua": "≈", "Luz": "ϟ", "Gas": "♨",
@@ -61,6 +62,18 @@ function ensureStateShape() {
   state.importHistory = state.importHistory || [];
   state.bank = state.bank || { provider: "demo", connected: false, lastSyncAt: "", candidates: [] };
   state.bank.selectedCandidateIds = state.bank.selectedCandidateIds || [];
+  state.bank.real = state.bank.real || {
+    configured: false,
+    institutions: [],
+    selectedInstitutionId: "",
+    selectedInstitutionName: "",
+    requisitionId: "",
+    accounts: [],
+    selectedAccountIds: []
+  };
+  state.bank.real.institutions = state.bank.real.institutions || [];
+  state.bank.real.accounts = state.bank.real.accounts || [];
+  state.bank.real.selectedAccountIds = state.bank.real.selectedAccountIds || [];
 }
 
 function customCategoriesByType(type) {
@@ -2224,7 +2237,51 @@ function initEvents() {
 function initInstallPrompt() {
   let deferredInstallPrompt = null;
   const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+
+  const updateInstallGuide = () => {
+    const title = $("installStatusTitle");
+    const text = $("installStatusText");
+    const steps = $("installGuideSteps");
+    if (!title || !text || !steps) return;
+
+    if (isStandalone) {
+      title.textContent = "Instalada";
+      text.textContent = "Estás usando Nexo como app. Perfecto.";
+      steps.innerHTML = `
+        <div><strong>✓</strong><span>Nexo ya está en modo app instalada.</span></div>
+        <div><strong>1</strong><span>Usa Exportar copia si vas a cambiar de móvil.</span></div>
+        <div><strong>2</strong><span>Si usas WiFi local, sincroniza antes de cerrar el PC.</span></div>
+        <div><strong>3</strong><span>Cuando conectemos banco real, las claves irán en backend privado.</span></div>`;
+      return;
+    }
+
+    if (isIos) {
+      title.textContent = "iPhone detectado";
+      text.textContent = "Safari no muestra botón de instalar: se añade desde Compartir.";
+      steps.innerHTML = `
+        <div><strong>1</strong><span>Abre Nexo en Safari.</span></div>
+        <div><strong>2</strong><span>Toca el icono Compartir.</span></div>
+        <div><strong>3</strong><span>Elige “Añadir a pantalla de inicio”.</span></div>
+        <div><strong>4</strong><span>Abre Nexo desde el nuevo icono.</span></div>`;
+      return;
+    }
+
+    if (isAndroid) {
+      title.textContent = deferredInstallPrompt ? "Android listo para instalar" : "Android detectado";
+      text.textContent = deferredInstallPrompt ? "Puedes instalar Nexo con el botón de guía." : "Si Chrome no muestra instalar, abre el menú ⋮ y elige Instalar app.";
+      steps.innerHTML = `
+        <div><strong>1</strong><span>Abre Nexo en Chrome.</span></div>
+        <div><strong>2</strong><span>Pulsa “Ver guía” o menú ⋮.</span></div>
+        <div><strong>3</strong><span>Elige “Instalar app”.</span></div>
+        <div><strong>4</strong><span>Abre Nexo desde el icono instalado.</span></div>`;
+      return;
+    }
+
+    title.textContent = "Navegador detectado";
+    text.textContent = "Puedes usar Nexo aquí o instalarlo desde el navegador si aparece la opción.";
+  };
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
@@ -2234,6 +2291,7 @@ function initInstallPrompt() {
     event.preventDefault();
     deferredInstallPrompt = event;
     $("installBtn").hidden = false;
+    updateInstallGuide();
   });
 
   if (isIos && !isStandalone) $("installBtn").hidden = false;
@@ -2241,16 +2299,21 @@ function initInstallPrompt() {
     $("installHelp").hidden = location.protocol !== "file:";
   }
 
-  $("installBtn").addEventListener("click", async () => {
+  const runInstallPrompt = async () => {
     if (deferredInstallPrompt) {
       deferredInstallPrompt.prompt();
       await deferredInstallPrompt.userChoice;
       deferredInstallPrompt = null;
       $("installBtn").hidden = true;
+      updateInstallGuide();
     } else {
       toast("En Safari: Compartir → Añadir a pantalla de inicio");
     }
-  });
+  };
+
+  $("installBtn").addEventListener("click", runInstallPrompt);
+  $("installGuideBtn")?.addEventListener("click", runInstallPrompt);
+  updateInstallGuide();
 }
 
 
@@ -4162,6 +4225,203 @@ function bankCategoryOptions(type, selected) {
   return categories.map((category) => `<option value="${escapeHtml(category)}"${category === selected ? " selected" : ""}>${escapeHtml(category)}</option>`).join("");
 }
 
+async function openBankingJson(path, options = {}) {
+  const response = await fetch(`${OPEN_BANKING_API}${path}`, {
+    cache: "no-store",
+    headers: options.body ? { "Content-Type": "application/json" } : undefined,
+    ...options,
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || payload.detail || `HTTP ${response.status}`);
+  return payload;
+}
+
+function setOpenBankingStatus(message, tone = "info") {
+  const status = $("openBankingStatus");
+  if (!status) return;
+  status.textContent = message;
+  status.dataset.tone = tone;
+}
+
+function selectedInstitution() {
+  ensureStateShape();
+  return (state.bank.real.institutions || []).find((item) => item.id === state.bank.real.selectedInstitutionId);
+}
+
+function renderInstitutionList() {
+  ensureStateShape();
+  const list = $("bankInstitutionList");
+  if (!list) return;
+  const query = normalizeHeader($("bankInstitutionSearch")?.value || "");
+  const institutions = (state.bank.real.institutions || [])
+    .filter((institution) => !query || normalizeHeader(`${institution.name || ""} ${institution.id || ""}`).includes(query))
+    .slice(0, 30);
+  if (!institutions.length) {
+    list.innerHTML = `<div class="bank-empty-state compact"><strong>No hay bancos cargados</strong><p>Carga bancos desde el backend local o revisa que el proveedor este configurado.</p></div>`;
+    $("startBankConsentBtn")?.setAttribute("disabled", "disabled");
+    return;
+  }
+  list.innerHTML = institutions.map((institution) => {
+    const selected = institution.id === state.bank.real.selectedInstitutionId;
+    return `
+      <button class="bank-institution-item${selected ? " selected" : ""}" type="button" data-institution-id="${escapeHtml(institution.id)}">
+        ${institution.logo ? `<img src="${escapeHtml(institution.logo)}" alt="">` : `<span class="bank-logo-fallback">🏦</span>`}
+        <span><strong>${escapeHtml(institution.name || institution.id)}</strong><small>${escapeHtml(institution.id || "")}</small></span>
+      </button>`;
+  }).join("");
+  $("startBankConsentBtn").disabled = !state.bank.real.selectedInstitutionId;
+}
+
+function bankAccountDisplayName(accountId) {
+  const account = (state.bank.real?.accounts || []).find((item) => item.id === accountId || item === accountId);
+  return account?.name || account?.iban || account?.id || accountId || "Cuenta bancaria";
+}
+
+function normalizeRealBankMovement(item) {
+  const type = item.type === "income" ? "income" : "expense";
+  return {
+    id: item.id || `real-bank-${Date.now()}-${Math.random()}`,
+    date: item.date || new Date().toISOString().slice(0, 10),
+    name: item.name || (type === "income" ? "Ingreso bancario" : "Gasto bancario"),
+    rawDescription: item.originalDescription || item.rawDescription || item.name || "",
+    amount: Number(item.amount) || 0,
+    type,
+    category: item.category || (type === "income" ? "Otros ingresos" : "Otros"),
+    account: bankAccountDisplayName(item.accountId),
+    source: "open-banking",
+    providerTransactionId: item.providerTransactionId || ""
+  };
+}
+
+function renderRealAccounts() {
+  ensureStateShape();
+  const accounts = state.bank.real.accounts || [];
+  if (!accounts.length) return;
+  $("bankAccountList").innerHTML = accounts.map((account) => {
+    const accountId = account.id || account;
+    const selected = (state.bank.real.selectedAccountIds || []).includes(accountId);
+    return `
+      <label class="bank-account-item real-account${selected ? " selected" : ""}">
+        <input type="checkbox" data-real-account="${escapeHtml(accountId)}"${selected ? " checked" : ""}>
+        <i></i>
+        <div><strong>${escapeHtml(account.name || "Cuenta autorizada")}</strong><span>${escapeHtml(account.iban || accountId)}</span></div>
+        <b>${selected ? "Activa" : "Lista"}</b>
+      </label>`;
+  }).join("");
+}
+
+function toggleOpenBankingPanel(force) {
+  const panel = $("openBankingPanel");
+  if (!panel) return;
+  panel.hidden = typeof force === "boolean" ? !force : !panel.hidden;
+  if (!panel.hidden) {
+    $("bankRequisitionInput").value = state.bank.real?.requisitionId || "";
+    renderInstitutionList();
+    setOpenBankingStatus(state.bank.real?.configured ? "Backend listo. Carga bancos o pega una requisition existente." : "Backend activo, pero aun faltan claves reales del proveedor.", state.bank.real?.configured ? "success" : "warning");
+  }
+}
+
+async function loadOpenBankingInstitutions() {
+  ensureStateShape();
+  const country = $("bankCountrySelect")?.value || "ES";
+  setOpenBankingStatus(`Cargando bancos de ${country}...`);
+  try {
+    const data = await openBankingJson(`/api/open-banking/institutions?country=${encodeURIComponent(country)}`);
+    state.bank.real.institutions = data.institutions || [];
+    state.bank.real.selectedInstitutionId = "";
+    state.bank.real.selectedInstitutionName = "";
+    saveState();
+    renderInstitutionList();
+    setOpenBankingStatus(`${state.bank.real.institutions.length} bancos cargados. Elige uno para autorizar.`, "success");
+  } catch (error) {
+    setOpenBankingStatus(`No se pudieron cargar bancos: ${error.message}`, "danger");
+    toast("Faltan claves reales o proveedor disponible", "danger");
+  }
+}
+
+async function startOpenBankingConsent() {
+  ensureStateShape();
+  const institution = selectedInstitution();
+  if (!institution) {
+    toast("Elige primero un banco", "info");
+    return;
+  }
+  setOpenBankingStatus(`Creando consentimiento para ${institution.name || institution.id}...`);
+  try {
+    const data = await openBankingJson("/api/open-banking/connect", {
+      method: "POST",
+      body: {
+        institution_id: institution.id,
+        user_language: "ES",
+        redirect: `${OPEN_BANKING_API}/api/open-banking/callback`
+      }
+    });
+    state.bank.provider = "real";
+    state.bank.connected = true;
+    state.bank.real.requisitionId = data.requisition_id || "";
+    state.bank.real.selectedInstitutionName = institution.name || institution.id;
+    saveState();
+    $("bankRequisitionInput").value = state.bank.real.requisitionId;
+    renderBankScreen();
+    setOpenBankingStatus("Consentimiento creado. Se abre la web del banco/proveedor en una pestana nueva.", "success");
+    if (data.link) window.open(data.link, "_blank", "noopener,noreferrer");
+  } catch (error) {
+    setOpenBankingStatus(`No se pudo crear consentimiento: ${error.message}`, "danger");
+  }
+}
+
+async function loadRealBankAccounts() {
+  ensureStateShape();
+  const requisitionId = ($("bankRequisitionInput")?.value || state.bank.real.requisitionId || "").trim();
+  if (!requisitionId) {
+    toast("Pega o crea primero una requisition", "info");
+    return;
+  }
+  setOpenBankingStatus("Cargando cuentas autorizadas...");
+  try {
+    const data = await openBankingJson(`/api/open-banking/requisitions/${encodeURIComponent(requisitionId)}/accounts`);
+    state.bank.provider = "real";
+    state.bank.connected = true;
+    state.bank.real.requisitionId = requisitionId;
+    state.bank.real.accounts = (data.accounts || []).map((account) => typeof account === "string" ? { id: account, name: "Cuenta autorizada" } : account);
+    state.bank.real.selectedAccountIds = state.bank.real.accounts.map((account) => account.id || account).filter(Boolean);
+    saveState();
+    renderBankScreen();
+    renderRealAccounts();
+    setOpenBankingStatus(`${state.bank.real.accounts.length} cuentas listas para sincronizar.`, "success");
+  } catch (error) {
+    setOpenBankingStatus(`No se pudieron cargar cuentas: ${error.message}`, "danger");
+  }
+}
+
+async function syncRealBank() {
+  ensureStateShape();
+  const accountIds = state.bank.real.selectedAccountIds || [];
+  if (!accountIds.length) {
+    toast("Primero carga y selecciona cuentas", "info");
+    return;
+  }
+  setOpenBankingStatus("Sincronizando movimientos reales...");
+  try {
+    const data = await openBankingJson("/api/open-banking/sync", {
+      method: "POST",
+      body: { account_ids: accountIds }
+    });
+    state.bank.provider = "real";
+    state.bank.connected = true;
+    state.bank.candidates = (data.movements || []).map(normalizeRealBankMovement);
+    state.bank.selectedCandidateIds = state.bank.candidates.map((item) => item.id);
+    state.bank.lastSyncAt = new Date().toISOString();
+    saveState();
+    render();
+    showScreen("bank");
+    setOpenBankingStatus(`${state.bank.candidates.length} movimientos reales listos para revisar.`, "success");
+  } catch (error) {
+    setOpenBankingStatus(`No se pudo sincronizar: ${error.message}`, "danger");
+  }
+}
+
 function syncBankSelectionWithCandidates(candidates, existingKeys) {
   ensureStateShape();
   const freshIds = candidates.filter((item) => !existingKeys.has(bankCandidateKey(item))).map((item) => item.id);
@@ -4236,7 +4496,7 @@ function renderBankScreen() {
   const netImpact = Math.max(0, freshExpense - freshIncome);
   const lastSyncText = bank.lastSyncAt ? formatSyncDate(bank.lastSyncAt) : "sin sincronizar";
 
-  badge.textContent = bank.connected ? "Demo conectado" : "Modo demo";
+  badge.textContent = bank.provider === "real" && bank.connected ? "Real conectado" : (bank.connected ? "Demo conectado" : "Modo demo");
   badge.classList.toggle("connected", !!bank.connected);
   $("bankProviderName").textContent = bank.provider === "real" ? "Open Banking real" : "Simulación segura";
   $("bankProviderStatus").textContent = bank.connected
@@ -4328,8 +4588,11 @@ async function checkBankBackendStatus() {
   const hint = $("bankBackendHint");
   if (!status || !hint) return;
   try {
-    const response = await fetch("http://localhost:8787/health", { cache: "no-store" });
+    const response = await fetch(`${OPEN_BANKING_API}/health`, { cache: "no-store" });
     const data = await response.json();
+    ensureStateShape();
+    state.bank.real.configured = !!data.configured;
+    saveState();
     status.textContent = data.configured ? "Listo" : "Activo sin claves";
     hint.textContent = data.configured
       ? "Backend preparado para proveedor real."
@@ -4408,6 +4671,41 @@ function importDemoBankMovements() {
 }
 
 function initBankScreen() {
+  $("connectRealBankBtn")?.addEventListener("click", () => toggleOpenBankingPanel(true));
+  $("closeOpenBankingPanelBtn")?.addEventListener("click", () => toggleOpenBankingPanel(false));
+  $("loadInstitutionsBtn")?.addEventListener("click", loadOpenBankingInstitutions);
+  $("startBankConsentBtn")?.addEventListener("click", startOpenBankingConsent);
+  $("loadRealAccountsBtn")?.addEventListener("click", loadRealBankAccounts);
+  $("syncRealBankBtn")?.addEventListener("click", syncRealBank);
+  $("bankInstitutionSearch")?.addEventListener("input", renderInstitutionList);
+  $("bankRequisitionInput")?.addEventListener("change", (event) => {
+    ensureStateShape();
+    state.bank.real.requisitionId = event.target.value.trim();
+    saveState();
+  });
+  $("bankInstitutionList")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-institution-id]");
+    if (!button) return;
+    ensureStateShape();
+    const id = button.dataset.institutionId;
+    const institution = (state.bank.real.institutions || []).find((item) => item.id === id);
+    state.bank.real.selectedInstitutionId = id;
+    state.bank.real.selectedInstitutionName = institution?.name || id;
+    saveState();
+    renderInstitutionList();
+    setOpenBankingStatus(`${state.bank.real.selectedInstitutionName} seleccionado. Ahora puedes autorizar.`, "success");
+  });
+  $("bankAccountList")?.addEventListener("change", (event) => {
+    const accountId = event.target?.dataset?.realAccount;
+    if (!accountId) return;
+    ensureStateShape();
+    const selected = new Set(state.bank.real.selectedAccountIds || []);
+    if (event.target.checked) selected.add(accountId);
+    else selected.delete(accountId);
+    state.bank.real.selectedAccountIds = [...selected];
+    saveState();
+    renderRealAccounts();
+  });
   $("connectDemoBankBtn")?.addEventListener("click", connectDemoBank);
   $("syncDemoBankBtn")?.addEventListener("click", syncDemoBank);
   $("importDemoBankBtn")?.addEventListener("click", importDemoBankMovements);

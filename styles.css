@@ -1355,6 +1355,152 @@ body[data-active-screen="settings"] .data-tools-card {
   cursor: not-allowed;
 }
 
+.open-banking-panel {
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--green) 38%, var(--line));
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(124, 232, 189, .16), transparent 34%),
+    color-mix(in srgb, var(--card) 92%, transparent);
+}
+
+.open-banking-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.open-banking-head span,
+.open-banking-reference,
+.open-banking-status {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.open-banking-head strong {
+  display: block;
+  margin: 3px 0;
+  font-size: 1.08rem;
+}
+
+.mini-link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-weight: 900;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.open-banking-controls {
+  display: grid;
+  grid-template-columns: .65fr 1.35fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.open-banking-controls label,
+.open-banking-reference {
+  display: grid;
+  gap: 7px;
+  font-weight: 850;
+}
+
+.open-banking-controls input,
+.open-banking-controls select,
+.open-banking-reference input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 13px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--card) 86%, transparent);
+}
+
+.bank-actions.compact {
+  margin-bottom: 12px;
+}
+
+.bank-institution-list {
+  display: grid;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+  margin: 10px 0;
+  padding-right: 4px;
+}
+
+.bank-institution-item {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 10px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  text-align: left;
+  cursor: pointer;
+}
+
+.bank-institution-item.selected {
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 42%, transparent);
+}
+
+.bank-institution-item img,
+.bank-logo-fallback {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.08);
+  object-fit: contain;
+}
+
+.bank-institution-item small {
+  display: block;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.open-banking-status {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.06);
+}
+
+.open-banking-status[data-tone="success"] {
+  color: var(--green);
+}
+
+.open-banking-status[data-tone="warning"] {
+  color: #f4c76a;
+}
+
+.open-banking-status[data-tone="danger"] {
+  color: var(--danger);
+}
+
+.bank-account-item.real-account {
+  cursor: pointer;
+}
+
+.bank-account-item.real-account input {
+  accent-color: var(--green);
+}
+
+.bank-account-item.real-account.selected {
+  border-color: color-mix(in srgb, var(--green) 58%, var(--line));
+}
+
 .bank-review-panel {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1533,6 +1679,14 @@ body[data-active-screen="settings"] .data-tools-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+  }
+
+  .open-banking-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .open-banking-head {
+    flex-direction: column;
   }
 
   .bank-actions button {
@@ -3572,5 +3726,78 @@ body[data-theme="dark"] {
 
   .bank-flow-steps small {
     font-size: 11px;
+  }
+}
+
+/* v1.33 - Asistente de instalación móvil */
+.install-status-panel {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.install-status-panel > div,
+.install-privacy-grid > div {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--green) 20%, var(--border));
+  border-radius: 22px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--green) 18%, transparent), transparent 48%),
+    var(--surface-soft);
+}
+
+.install-status-panel span {
+  display: block;
+  color: var(--muted);
+  font-size: .74rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 950;
+}
+
+.install-status-panel strong {
+  display: block;
+  margin: 7px 0 4px;
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  letter-spacing: -.05em;
+}
+
+.install-status-panel small,
+.install-privacy-grid span {
+  display: block;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.install-guide-steps div {
+  min-height: 92px;
+  border-color: color-mix(in srgb, var(--green) 18%, var(--border));
+}
+
+.install-guide-steps strong {
+  color: #07130f;
+  background: linear-gradient(135deg, #7ce8bd, #58dca9);
+}
+
+.install-privacy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.install-privacy-grid strong {
+  display: block;
+  margin-bottom: 5px;
+  letter-spacing: -.03em;
+}
+
+@media (max-width: 760px) {
+  .install-status-panel,
+  .install-privacy-grid {
+    grid-template-columns: 1fr;
   }
 }

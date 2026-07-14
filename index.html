@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icons/icon-192.png?v=nexo-black-20260711" type="image/png">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=nexo-black-20260711">
-  <link rel="stylesheet" href="styles.css?v=1.32">
+  <link rel="stylesheet" href="styles.css?v=1.34">
 </head>
 <body data-theme="light" data-risk="safe">
   <main class="app-shell">
@@ -394,19 +394,30 @@
     <section class="card mobile-access-card" data-screen="settings">
       <div class="card-heading">
         <div>
-          <p class="eyebrow">MÓVIL Y PWA</p>
-          <h2>Usarla desde el iPhone o Android</h2>
-          <p class="section-copy">Para probarla en el móvil, arranca el archivo <strong>2_INICIAR_NEXO_WIFI.bat</strong> y abre la dirección WiFi que salga en la ventana negra.</p>
+          <p class="eyebrow">APP MÓVIL</p>
+          <h2>Instalar Nexo como app</h2>
+          <p class="section-copy">Nexo puede vivir en la pantalla de inicio como una app normal. Detecto tu dispositivo y te digo el camino exacto.</p>
         </div>
-        <button id="copyCurrentUrlBtn" class="secondary-btn" type="button">Copiar dirección actual</button>
+        <div class="card-actions">
+          <button id="installGuideBtn" class="primary-btn" type="button">Ver guía</button>
+          <button id="copyCurrentUrlBtn" class="secondary-btn" type="button">Copiar enlace</button>
+        </div>
       </div>
-      <div class="mobile-steps">
-        <div><strong>1</strong><span>PC y móvil en la misma WiFi.</span></div>
-        <div><strong>2</strong><span>Ejecuta <code>2_INICIAR_NEXO_WIFI.bat</code>.</span></div>
-        <div><strong>3</strong><span>En Safari/Chrome abre la URL <code>http://192.168.x.x:8765/</code>.</span></div>
-        <div><strong>4</strong><span>En iPhone: Compartir → Añadir a pantalla de inicio.</span></div>
+      <div id="installStatusPanel" class="install-status-panel">
+        <div><span>Estado</span><strong id="installStatusTitle">Comprobando...</strong><small id="installStatusText">Detectando navegador y modo de apertura.</small></div>
+        <div><span>Datos</span><strong>Locales</strong><small>Tu información se queda en este navegador salvo que exportes copia o uses WiFi local.</small></div>
       </div>
-      <div class="backup-hint"><strong>Nuevo:</strong> en Ajustes → Sincronización WiFi puedes guardar los datos en el PC y traerlos desde el móvil sin exportar copias manuales.</div>
+      <div id="installGuideSteps" class="mobile-steps install-guide-steps">
+        <div><strong>1</strong><span>Abre Nexo en Safari/Chrome desde GitHub Pages o WiFi local.</span></div>
+        <div><strong>2</strong><span>Usa Compartir o Instalar app según tu dispositivo.</span></div>
+        <div><strong>3</strong><span>Entra desde el icono de Nexo de la pantalla de inicio.</span></div>
+        <div><strong>4</strong><span>Exporta una copia de seguridad antes de meter datos importantes.</span></div>
+      </div>
+      <div class="install-privacy-grid">
+        <div><strong>Sin cuentas</strong><span>No hay login ni contraseña de Nexo.</span></div>
+        <div><strong>Sin claves públicas</strong><span>Las claves bancarias reales nunca irán en GitHub Pages.</span></div>
+        <div><strong>Copia manual</strong><span>Exporta/restaura tus datos cuando cambies de dispositivo.</span></div>
+      </div>
     </section>
 
 
@@ -439,9 +450,45 @@
           <div><strong>4</strong><span>Importa</span><small>Entran limpios al presupuesto.</small></div>
         </div>
         <div class="bank-actions">
-          <button id="connectDemoBankBtn" class="primary-btn" type="button">Conectar banco demo</button>
-          <button id="syncDemoBankBtn" class="secondary-btn" type="button">Sincronizar movimientos</button>
+          <button id="connectRealBankBtn" class="primary-btn" type="button">Conectar banco real</button>
+          <button id="connectDemoBankBtn" class="secondary-btn" type="button">Modo demo</button>
+          <button id="syncDemoBankBtn" class="secondary-btn" type="button">Sincronizar</button>
           <button id="importDemoBankBtn" class="secondary-btn" type="button">Importar a Nexo</button>
+        </div>
+        <div id="openBankingPanel" class="open-banking-panel" hidden>
+          <div class="open-banking-head">
+            <div>
+              <span>OPEN BANKING REAL</span>
+              <strong>Conexion segura por consentimiento</strong>
+              <small>Las claves viven solo en el backend local. Nexo nunca pide tu contrasena del banco.</small>
+            </div>
+            <button id="closeOpenBankingPanelBtn" class="mini-link-btn" type="button">Cerrar</button>
+          </div>
+          <div class="open-banking-controls">
+            <label>Pais
+              <select id="bankCountrySelect">
+                <option value="ES">Espana</option>
+                <option value="FR">Francia</option>
+                <option value="PT">Portugal</option>
+                <option value="DE">Alemania</option>
+                <option value="IT">Italia</option>
+              </select>
+            </label>
+            <label>Buscar banco
+              <input id="bankInstitutionSearch" type="search" placeholder="Santander, BBVA, Revolut...">
+            </label>
+          </div>
+          <div class="bank-actions compact">
+            <button id="loadInstitutionsBtn" class="secondary-btn" type="button">Cargar bancos</button>
+            <button id="startBankConsentBtn" class="secondary-btn" type="button" disabled>Autorizar banco</button>
+            <button id="loadRealAccountsBtn" class="secondary-btn" type="button">Cargar cuentas</button>
+            <button id="syncRealBankBtn" class="secondary-btn" type="button">Sincronizar real</button>
+          </div>
+          <div id="bankInstitutionList" class="bank-institution-list"></div>
+          <label class="open-banking-reference">ID de conexion / requisition
+            <input id="bankRequisitionInput" type="text" placeholder="Se rellena al autorizar, o pegalo aqui">
+          </label>
+          <p id="openBankingStatus" class="open-banking-status">Abre el panel cuando tengas proveedor configurado en el backend.</p>
         </div>
         <div id="bankReviewPanel" class="bank-review-panel"></div>
       </article>
@@ -512,8 +559,8 @@
 
     <section class="card app-version-card" data-screen="settings">
       <p class="eyebrow">VERSIÓN</p>
-      <h2>Nexo v1.32 Seguridad pública</h2>
-      <p class="section-copy">Versión con pantalla Banco más limpia en móvil, revisión previa de movimientos, modo demo, nuevo logo, PWA, modo WiFi y guía clara para automatización bancaria.</p>
+      <h2>Nexo v1.34 Open Banking</h2>
+      <p class="section-copy">Versión con panel real de Open Banking: carga bancos, autoriza consentimiento, recupera cuentas y sincroniza movimientos desde backend local seguro.</p>
     </section>
 
     <section class="card rules-card" data-screen="settings">
@@ -858,6 +905,6 @@
   </nav>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=1.32"></script>
+  <script src="app.js?v=1.33"></script>
 </body>
 </html>
