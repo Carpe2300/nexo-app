@@ -426,28 +426,28 @@
         <div class="card-heading">
           <div>
             <p class="eyebrow">BANCO</p>
-            <h2>Banco automático, sin líos</h2>
-            <p class="section-copy">Primero lo probamos en modo seguro: sincroniza movimientos demo, revisa compras, Bizum y devoluciones, y luego impórtalos a Nexo sin duplicados.</p>
+            <h2>Banco automático</h2>
+            <p class="section-copy">Prueba con demo ahora. Cuando Salt Edge apruebe tu acceso, conectas el banco real.</p>
           </div>
           <span id="bankConnectionBadge" class="bank-connection-badge">Demo</span>
         </div>
         <div class="bank-provider-panel">
           <div>
-            <span>Modo actual</span>
+            <span>Modo</span>
             <strong id="bankProviderName">Demo local</strong>
-            <small id="bankProviderStatus">Sin credenciales reales. La app funciona en modo simulación.</small>
+            <small id="bankProviderStatus">Seguro, sin datos reales.</small>
           </div>
           <div>
             <span>Backend local</span>
             <strong id="bankBackendStatus">Comprobando...</strong>
-            <small id="bankBackendHint">Nexo mirará si existe http://localhost:8787/health.</small>
+            <small id="bankBackendHint">Conecta con Salt Edge desde tu PC.</small>
           </div>
         </div>
         <div class="bank-flow-steps" aria-label="Flujo de banco">
-          <div><strong>1</strong><span>Conecta</span><small>Activa el banco demo.</small></div>
-          <div><strong>2</strong><span>Sincroniza</span><small>Nexo detecta compras e ingresos.</small></div>
-          <div><strong>3</strong><span>Revisa</span><small>Se separan gastos, Bizum y duplicados.</small></div>
-          <div><strong>4</strong><span>Importa</span><small>Entran limpios al presupuesto.</small></div>
+          <div><strong>1</strong><span>Conecta</span><small>Demo o real</small></div>
+          <div><strong>2</strong><span>Sincroniza</span><small>Movimientos</small></div>
+          <div><strong>3</strong><span>Revisa</span><small>Sin duplicados</small></div>
+          <div><strong>4</strong><span>Importa</span><small>A Nexo</small></div>
         </div>
         <div class="bank-actions">
           <button id="connectRealBankBtn" class="primary-btn" type="button">Conectar banco real</button>
@@ -459,8 +459,8 @@
           <div class="open-banking-head">
             <div>
               <span>OPEN BANKING REAL</span>
-              <strong>Conexion segura con Salt Edge</strong>
-              <small>Las claves viven solo en el backend local. Nexo abre el widget seguro del proveedor y nunca guarda tu contrasena del banco.</small>
+              <strong>Banco real con Salt Edge</strong>
+              <small>Nexo abre el widget seguro. Tu contraseña bancaria nunca se guarda aquí.</small>
             </div>
             <button id="closeOpenBankingPanelBtn" class="mini-link-btn" type="button">Cerrar</button>
           </div>

@@ -4233,8 +4233,22 @@ async function openBankingJson(path, options = {}) {
     body: options.body ? JSON.stringify(options.body) : undefined
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || payload.detail || `HTTP ${response.status}`);
+  if (!response.ok) throw new Error(friendlyOpenBankingError(payload.error || payload.detail || `HTTP ${response.status}`));
   return payload;
+}
+
+function friendlyOpenBankingError(message) {
+  const text = String(message || "");
+  if (/client pending/i.test(text)) {
+    return "Salt Edge aún está revisando tu acceso. Mientras tanto usa el modo demo.";
+  }
+  if (/attempt\.locale|locale parameter/i.test(text)) {
+    return "Había un ajuste de idioma pendiente. Reinicia el backend y vuelve a probar.";
+  }
+  if (/SALTEDGE_APP_ID|SALTEDGE_SECRET/i.test(text)) {
+    return "Faltan las claves de Salt Edge en el backend local.";
+  }
+  return text;
 }
 
 function setOpenBankingStatus(message, tone = "info") {
@@ -4498,10 +4512,10 @@ function renderBankScreen() {
 
   badge.textContent = bank.provider === "real" && bank.connected ? "Real conectado" : (bank.connected ? "Demo conectado" : "Modo demo");
   badge.classList.toggle("connected", !!bank.connected);
-  $("bankProviderName").textContent = bank.provider === "real" ? "Open Banking real" : "Simulación segura";
+  $("bankProviderName").textContent = bank.provider === "real" ? "Banco real" : "Demo segura";
   $("bankProviderStatus").textContent = bank.connected
-    ? `Conectado · última sincronización ${lastSyncText}.`
-    : "Prueba el flujo completo sin meter datos reales ni credenciales.";
+    ? `Última sincronización: ${lastSyncText}`
+    : "Lista para probar sin credenciales.";
   $("bankSyncLabel").textContent = bank.lastSyncAt ? `Última ${lastSyncText}` : "Pendiente";
   $("importDemoBankBtn").disabled = !selectedFreshCandidates.length;
   $("importDemoBankBtn").textContent = selectedFreshCandidates.length ? `Importar ${selectedFreshCandidates.length} seleccionados` : "Nada seleccionado";
