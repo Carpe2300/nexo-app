@@ -4353,7 +4353,7 @@ async function startOpenBankingConsent() {
       method: "POST",
       body: {
         institution_id: institution.id,
-        user_language: "ES",
+        user_language: "es",
         redirect: `${OPEN_BANKING_API}/api/open-banking/callback`
       }
     });
